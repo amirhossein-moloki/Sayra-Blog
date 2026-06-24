@@ -13,45 +13,55 @@ export const scheduledPostPublisherWorker = new Worker(
 
     const now = new Date();
 
-    const postsToPublish = await prisma.post.findMany({
-      where: {
-        status: PageStatus.SCHEDULED,
-        scheduledAt: { lte: now },
-        isActive: true,
-      },
-    });
+    const [postsToPublish, pagesToPublish] = await Promise.all([
+      prisma.post.findMany({
+        where: { status: PageStatus.SCHEDULED, scheduledAt: { lte: now }, isActive: true },
+      }),
+      prisma.page.findMany({
+        where: { status: PageStatus.SCHEDULED, scheduledAt: { lte: now }, isActive: true },
+      }),
+    ]);
 
-    if (postsToPublish.length === 0) {
-      logger.info('No scheduled posts to publish.');
+    if (postsToPublish.length === 0 && pagesToPublish.length === 0) {
+      logger.info('No scheduled content to publish.');
       return;
     }
 
-    const publishResults = await Promise.all(
+    // Publish Posts
+    const postResults = await Promise.all(
       postsToPublish.map(async (post) => {
         try {
           await prisma.post.update({
             where: { id: post.id },
-            data: {
-              status: PageStatus.PUBLISHED,
-              publishedAt: post.scheduledAt || now,
-              scheduledAt: null,
-            },
+            data: { status: PageStatus.PUBLISHED, publishedAt: post.scheduledAt || now, scheduledAt: null },
           });
-          logger.info(`Successfully published post: ${post.id}`);
-
-          // Emit domain event
           eventEmitter.emit('CMS_POST_PUBLISHED', { postId: post.id, gamingCenterId: post.gamingCenterId });
-
-          return { id: post.id, success: true };
+          return { success: true };
         } catch (error) {
-          logger.error(`Failed to publish post ${post.id}: ${error instanceof Error ? error.message : String(error)}`);
-          return { id: post.id, success: false };
+          logger.error(`Failed to publish post ${post.id}: ${error}`);
+          return { success: false };
         }
       })
     );
 
-    const successful = publishResults.filter((r) => r.success).length;
-    logger.info(`Published ${successful}/${postsToPublish.length} scheduled posts.`);
+    // Publish Pages
+    const pageResults = await Promise.all(
+      pagesToPublish.map(async (page) => {
+        try {
+          await prisma.page.update({
+            where: { id: page.id },
+            data: { status: PageStatus.PUBLISHED, publishedAt: page.scheduledAt || now, scheduledAt: null },
+          });
+          eventEmitter.emit('CMS_PAGE_PUBLISHED', { pageId: page.id, gamingCenterId: page.gamingCenterId });
+          return { success: true };
+        } catch (error) {
+          logger.error(`Failed to publish page ${page.id}: ${error}`);
+          return { success: false };
+        }
+      })
+    );
+
+    logger.info(`Published ${postResults.filter(r => r.success).length} posts and ${pageResults.filter(r => r.success).length} pages.`);
   },
   { connection: defaultQueueOptions.connection }
 );
