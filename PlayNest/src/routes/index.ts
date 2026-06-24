@@ -7,6 +7,8 @@ import { settingsRouter } from '../modules/settings/settings.routes';
 import auditRoutes from '../modules/audit/audit.routes';
 import { taxonomyRouter } from '../modules/taxonomy/taxonomy.routes';
 import { postsRouter } from '../modules/posts/posts.routes';
+import { commentsRouter } from '../modules/comments/comments.routes';
+import { reactionsRouter } from '../modules/reactions/reactions.routes';
 import { webhooksRoutes } from '../modules/webhooks/webhooks.routes';
 
 const router = Router();
@@ -30,6 +32,12 @@ router.use('/gamingCenters/:gamingCenterId/taxonomy', taxonomyRouter);
 
 // --- Posts Module Routes ---
 router.use('/gamingCenters/:gamingCenterId/posts', postsRouter);
+
+// --- Comments Module Routes ---
+router.use('/gamingCenters/:gamingCenterId/comments', commentsRouter);
+
+// --- Reactions Module Routes ---
+router.use('/gamingCenters/:gamingCenterId/reactions', reactionsRouter);
 
 // --- Webhooks Module ---
 router.use(webhooksRoutes);
