@@ -5,6 +5,8 @@ import gamingCenterRouter from '../modules/gamingCenter/gamingCenter.routes';
 import staffRouter from '../modules/users/users.routes';
 import { settingsRouter } from '../modules/settings/settings.routes';
 import auditRoutes from '../modules/audit/audit.routes';
+import { taxonomyRouter } from '../modules/taxonomy/taxonomy.routes';
+import { postsRouter } from '../modules/posts/posts.routes';
 import { webhooksRoutes } from '../modules/webhooks/webhooks.routes';
 
 const router = Router();
@@ -22,6 +24,12 @@ router.use('/gamingCenters/:gamingCenterId/settings', settingsRouter);
 
 // --- Audit Module Routes ---
 router.use('/gamingCenters/:gamingCenterId/audit-logs', auditRoutes);
+
+// --- Taxonomy Module Routes ---
+router.use('/gamingCenters/:gamingCenterId/taxonomy', taxonomyRouter);
+
+// --- Posts Module Routes ---
+router.use('/gamingCenters/:gamingCenterId/posts', postsRouter);
 
 // --- Webhooks Module ---
 router.use(webhooksRoutes);
