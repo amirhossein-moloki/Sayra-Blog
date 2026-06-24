@@ -11,4 +11,13 @@ export enum AppEvents {
   RESERVATION_NOSHOW = 'reservation.noshow',
   PAYMENT_SUCCESS = 'payment.success',
   REVIEW_CREATED = 'rating.created',
+
+  COMMENT_CREATED = 'comment.created',
+  COMMENT_UPDATED = 'comment.updated',
+  COMMENT_DELETED = 'comment.deleted',
+  COMMENT_APPROVED = 'comment.approved',
+
+  REACTION_CREATED = 'reaction.created',
+  REACTION_UPDATED = 'reaction.updated',
+  REACTION_REMOVED = 'reaction.removed',
 }

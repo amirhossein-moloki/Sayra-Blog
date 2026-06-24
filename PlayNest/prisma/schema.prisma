@@ -163,8 +163,17 @@ enum SeriesOrderStrategy {
 enum CommentStatus {
   PENDING
   APPROVED
-  SPAM
-  REMOVED
+  REJECTED
+  DELETED
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  LAUGH
+  WOW
+  SAD
+  ANGRY
 }
 
 enum MenuLocation {
@@ -315,6 +324,7 @@ model GamingCenter {
   media        Media[]
   links        SocialLink[]
   addresses    Address[]
+  reactionAggregates ReactionAggregate[]
 
   // Ratings
   ratings Rating[]
@@ -698,6 +708,10 @@ model Comment {
   parentId    String?
   parent      Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies     Comment[]     @relation("CommentReplies")
+  rootId      String?
+  depth       Int           @default(0)
+  isPinned    Boolean       @default(false)
+  flagCount   Int           @default(0)
   content     String        @db.Text
   status      CommentStatus @default(PENDING)
   ip          String?
@@ -705,6 +719,10 @@ model Comment {
   isActive    Boolean       @default(true)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@index([gamingCenterId, postId, status, isActive])
+  @@index([rootId, status, isActive])
+  @@index([userId, createdAt])
 }
 
 model Reaction {
@@ -713,7 +731,7 @@ model Reaction {
   gamingCenter    GamingCenter @relation(fields: [gamingCenterId], references: [id])
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reaction        String   // e.g., 'like', or emoji code
+  type            ReactionType
 
   // Polymorphic relation simulation (Generic Foreign Key)
   contentType String   // e.g., 'post', 'comment'
@@ -723,7 +741,24 @@ model Reaction {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@unique([userId, contentType, objectId, reaction])
+  @@unique([userId, contentType, objectId])
+  @@index([contentType, objectId])
+  @@index([gamingCenterId])
+}
+
+model ReactionAggregate {
+  id              String   @id @default(cuid())
+  gamingCenterId  String
+  gamingCenter    GamingCenter @relation(fields: [gamingCenterId], references: [id])
+  contentType     String   // e.g., 'post', 'comment'
+  objectId        String
+  type            ReactionType
+  count           Int      @default(0)
+
+  updatedAt       DateTime @updatedAt
+
+  @@unique([contentType, objectId, type])
+  @@index([gamingCenterId])
   @@index([contentType, objectId])
 }
 
