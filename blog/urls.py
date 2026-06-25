@@ -16,6 +16,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from core.views import shadow_dashboard
 from posts.ckeditor_views import ckeditor_upload_view
 
 from .ckeditor_views import ckeditor5_upload
@@ -76,6 +77,7 @@ urlpatterns = [
     path("api/", include("pages.urls", namespace="pages")),
     path("api/", include("navigation.urls", namespace="navigation")),
     path("api/editor/upload/", ckeditor_upload_view, name="ckeditor_upload"),
+    path("admin/shadow-dashboard/", shadow_dashboard, name="shadow_dashboard"),
 ]
 
 # --- Debug Tools & Static/Media ---

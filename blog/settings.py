@@ -56,6 +56,14 @@ STATIC_API_KEY = os.environ.get("STATIC_API_KEY")
 SITE_NAME = os.environ.get("SITE_NAME", "Blog Platform")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
+# Shadow Mode Configuration
+SHADOW_MODE_ENABLED = os.environ.get("SHADOW_MODE_ENABLED", "True").lower() in (
+    "true",
+    "1",
+    "t",
+)
+PLAYNEST_URL = os.environ.get("PLAYNEST_URL", "http://localhost:3000/api/v1")
+
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", f"localhost,127.0.0.1,{DOMAIN}").split(
     ","
 )
@@ -125,6 +133,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
+    "core.middleware.shadow_proxy.ShadowProxyMiddleware",
 ]
 
 ROOT_URLCONF = "blog.urls"
@@ -151,6 +160,13 @@ ASGI_APPLICATION = "blog.asgi.application"
 # EN: Database configuration with support for environment-driven URLs and SQLite fallback for tests.
 # FA: تنظیمات پایگاه داده با پشتیبانی از آدرس‌های مبتنی بر محیط و جایگزین SQLite برای تست‌ها.
 is_testing_db = "test" in sys.argv or "pytest" in sys.modules
+
+# Disable shadow mode by default during tests to prevent DB locking issues
+if is_testing_db:
+    SHADOW_MODE_ENABLED = False
+    # Ensure STATIC_API_KEY is always set during tests for API authentication
+    if not STATIC_API_KEY:
+        STATIC_API_KEY = "test-static-api-key-for-ci"
 
 if is_testing_db:
     DATABASES = {
