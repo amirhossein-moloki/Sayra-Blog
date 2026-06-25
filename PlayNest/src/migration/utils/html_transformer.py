@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 
+
 def transform_html_content(html):
     if not html:
         return html
@@ -41,6 +42,7 @@ def transform_html_content(html):
 
     # Return as string (BeautifulSoup handles malformed HTML and produces valid output)
     return str(soup)
+
 
 if __name__ == "__main__":
     sample_html = '<p>Check this <img src="/media/uploads/test.png" data-cke-saved-src="..."> and <a href="/posts/detail/42/">this link</a></p>'

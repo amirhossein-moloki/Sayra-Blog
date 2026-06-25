@@ -18,7 +18,7 @@ The migration system is designed as a modular ETL pipeline that ensures data int
 
 ### 3. Loading Layer (TypeScript/Prisma)
 - **Simulation Mode:** Default mode that validates all transformations and integrity rules without database side effects.
-- **Production Mode:** Uses Prisma Transactions to ensure atomic inserts.
+- **Production Mode:** Uses Prisma Transactions with `upsert` logic to ensure atomic and idempotent inserts.
 - **Dependency Ordering:** Entities are loaded in order: Users -> Media -> Taxonomy -> Content -> Engagement.
 - **Location:** `PlayNest/src/migration/loaders/`
 

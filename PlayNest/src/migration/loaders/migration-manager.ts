@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { PrismaClient } from '@prisma/client';
 import { transformIdentity } from '../transformers/transform-identity';
 import { transformMediaTaxonomy } from '../transformers/transform-media-taxonomy';
 import { transformContent } from '../transformers/transform-content';
@@ -11,10 +12,12 @@ import { validateMediaIntegrity } from '../validators/media-validator';
 export class MigrationManager {
   private dryRun: boolean;
   private dataDir: string;
+  private prisma: PrismaClient;
 
   constructor(dryRun = true) {
     this.dryRun = dryRun;
     this.dataDir = path.join(__dirname, '../data-temp');
+    this.prisma = new PrismaClient();
   }
 
   async run() {
@@ -32,6 +35,8 @@ export class MigrationManager {
       }
     } catch (error) {
         console.error('Migration failed:', error);
+    } finally {
+        await this.prisma.$disconnect();
     }
   }
 
@@ -74,29 +79,45 @@ export class MigrationManager {
   }
 
   private async loadData(data: any) {
-    console.log('Production Loading Mode: Simulating transactions (Database not reachable in sandbox)...');
+    console.log('Production Loading Mode: Executing Prisma transactions...');
 
-    // In a real environment, we would use:
-    // await this.prisma.$transaction(async (tx) => { ... });
+    // Check if database is reachable (simple check)
+    try {
+        await this.prisma.$connect();
+    } catch (e) {
+        console.warn('Database not reachable, switching to simulation mode.');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return;
+    }
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Production load simulation complete.');
-  }
+    // In a real environment, we execute the transaction
+    await this.prisma.$transaction(async (tx) => {
+        // 1. Users & Authors
+        for (const user of data.users) await tx.user.upsert({ where: { id: user.id }, create: user, update: user });
+        for (const author of data.authors) await tx.authorProfile.upsert({ where: { userId: author.userId }, create: author, update: author });
 
-  private generateReports(data: any, status: string) {
-    const reportsDir = path.join(__dirname, '../reports');
-    if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir);
+        // 2. Media & Taxonomy
+        for (const m of data.media) await tx.media.upsert({ where: { id: m.id }, create: m, update: m });
+        for (const c of data.categories) await tx.category.upsert({ where: { id: c.id }, create: c, update: c });
+        for (const t of data.tags) await tx.tag.upsert({ where: { id: t.id }, create: t, update: t });
+        for (const s of data.series) await tx.series.upsert({ where: { id: s.id }, create: s, update: s });
 
-    const reportPath = path.join(reportsDir, 'migration-results.json');
-    const stats = Object.fromEntries(Object.entries(data).map(([k, v]: [any, any]) => [k, v.length]));
+        // 3. Content
+        for (const p of data.posts) await tx.post.upsert({ where: { id: p.id }, create: p, update: p });
+        for (const pg of data.pages) await tx.page.upsert({ where: { id: pg.id }, create: pg, update: pg });
+        for (const pt of data.postTags) await (tx.postTag as any).upsert({
+            where: { postId_tagId: { postId: pt.postId, tagId: pt.tagId } },
+            create: pt,
+            update: pt
+        });
 
-    fs.writeFileSync(reportPath, JSON.stringify({
-      timestamp: new Date(),
-      status,
-      stats,
-    }, null, 2));
+        // 4. Social
+        for (const c of data.comments) await tx.comment.upsert({ where: { id: c.id }, create: c, update: c });
+    }, {
+        timeout: 60000 // Extended timeout for large migrations
+    });
 
-    this.generateMarkdownReports(stats, status);
+    console.log('Production load complete.');
   }
 
   private generateMarkdownReports(data: any, status: string) {

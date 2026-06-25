@@ -37,7 +37,7 @@
 | --- | --- | --- |
 | `Post.slug` | `Post.slug` | Preserve |
 | `Post.status` | `Post.status` | Convert to Uppercase Enum |
-| `Post.content` | `Post.content` | Regex replace Media IDs/URLs in HTML |
+| `Post.content` | `Post.content` | DOM-based transformation (BeautifulSoup) for media and internal links. |
 | `Page.slug` | `Page.slug` | Preserve |
 | `Page.seo_title` | `Page.seoTitle` | Preserve |
 
