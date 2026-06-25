@@ -1,0 +1,4 @@
+# Add this file to keep the directory in git if needed, but we prefer to keep it empty
+*.json
+!migration-config.json
+!.gitkeep
