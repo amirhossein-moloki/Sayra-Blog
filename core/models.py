@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class ShadowLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     method = models.CharField(max_length=10)
@@ -13,21 +14,21 @@ class ShadowLog(models.Model):
     match_status = models.CharField(
         max_length=20,
         choices=[
-            ('MATCH', 'Match'),
-            ('MISMATCH', 'Mismatch'),
-            ('ERROR', 'Error'),
+            ("MATCH", "Match"),
+            ("MISMATCH", "Mismatch"),
+            ("ERROR", "Error"),
         ],
-        default='MATCH'
+        default="MATCH",
     )
     mismatch_severity = models.CharField(
         max_length=20,
         choices=[
-            ('NONE', 'None'),
-            ('INFO', 'Info'),
-            ('WARNING', 'Warning'),
-            ('CRITICAL', 'Critical'),
+            ("NONE", "None"),
+            ("INFO", "Info"),
+            ("WARNING", "Warning"),
+            ("CRITICAL", "Critical"),
         ],
-        default='NONE'
+        default="NONE",
     )
     django_latency_ms = models.FloatField()
     playnest_latency_ms = models.FloatField(null=True, blank=True)

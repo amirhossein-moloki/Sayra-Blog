@@ -16,6 +16,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from core.views import shadow_dashboard
 from posts.ckeditor_views import ckeditor_upload_view
 
 from .ckeditor_views import ckeditor5_upload
@@ -24,7 +25,6 @@ from .sitemaps import (
     StaticViewSitemap,
 )
 from .views import page_not_found_view
-from core.views import shadow_dashboard
 
 # EN: Custom 404 handler for the project.
 # FA: مدیریت‌کننده سفارشی خطای ۴۰۴ برای پروژه.
