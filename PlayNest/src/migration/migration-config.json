@@ -1,0 +1,6 @@
+{
+  "gamingCenterId": "cm1m2m3m4000008l26k5h6g7f",
+  "gamingCenterSlug": "primary-cms",
+  "sourceDbPath": "../db.sqlite3",
+  "outputDir": "./data-temp"
+}
