@@ -84,6 +84,9 @@ const EnvSchema = z.object({
   SENTRY_ENABLED: z.preprocess(toBool, z.boolean()).default(false),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(1.0),
 
+  // Shadow Mode
+  SHADOW_MODE: z.preprocess(toBool, z.boolean()).default(false),
+
   // SmsIr
   SMSIR_API_KEY: z.string().optional(),
   SMSIR_LINE_NUMBER: z.coerce.number().optional(),

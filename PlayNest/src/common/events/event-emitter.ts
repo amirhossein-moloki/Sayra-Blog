@@ -1,6 +1,17 @@
 import { EventEmitter } from 'events';
+import { env } from '../../config/env';
 
-export const eventEmitter = new EventEmitter();
+class ShadowEventEmitter extends EventEmitter {
+  emit(eventName: string | symbol, ...args: any[]): boolean {
+    if (env.SHADOW_MODE) {
+      console.log(`[SHADOW MODE] Suppressing event: ${String(eventName)}`, args);
+      return true;
+    }
+    return super.emit(eventName, ...args);
+  }
+}
+
+export const eventEmitter = new ShadowEventEmitter();
 
 export enum AppEvents {
   RESERVATION_CREATED = 'reservation.created',

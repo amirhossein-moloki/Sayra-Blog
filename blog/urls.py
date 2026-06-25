@@ -24,6 +24,7 @@ from .sitemaps import (
     StaticViewSitemap,
 )
 from .views import page_not_found_view
+from core.views import shadow_dashboard
 
 # EN: Custom 404 handler for the project.
 # FA: مدیریت‌کننده سفارشی خطای ۴۰۴ برای پروژه.
@@ -76,6 +77,7 @@ urlpatterns = [
     path("api/", include("pages.urls", namespace="pages")),
     path("api/", include("navigation.urls", namespace="navigation")),
     path("api/editor/upload/", ckeditor_upload_view, name="ckeditor_upload"),
+    path("admin/shadow-dashboard/", shadow_dashboard, name="shadow_dashboard"),
 ]
 
 # --- Debug Tools & Static/Media ---
