@@ -1,9 +1,10 @@
-import sqlite3
 import json
 import os
-import sys
-from bs4 import BeautifulSoup
 import re
+import sqlite3
+import sys
+
+from bs4 import BeautifulSoup
 
 # Fallback for psycopg2 if not available
 try:

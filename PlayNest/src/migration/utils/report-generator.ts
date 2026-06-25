@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export function generateDynamicValidationReport(stats: any, status: string, integrity: any) {
-    const reportPath = path.join(__dirname, '../../../../MIGRATION_VALIDATION_REPORT.md');
+    const reportPath = path.join(__dirname, '../../../../docs/migration-reports/MIGRATION_VALIDATION_REPORT.md');
 
     let report = `# Phase 4: Migration Integrity & Validation Report\n\n`;
     report += `## Summary\n`;
@@ -38,7 +38,7 @@ export function generateDynamicValidationReport(stats: any, status: string, inte
 }
 
 export function generateIdempotencyReport(data: any) {
-    const reportPath = path.join(__dirname, '../../../../IDEMPOTENCY_VERIFICATION_REPORT.md');
+    const reportPath = path.join(__dirname, '../../../../docs/migration-reports/IDEMPOTENCY_VERIFICATION_REPORT.md');
     let report = `# Idempotency Verification Report\n\n`;
     report += `All entity IDs are generated using a deterministic hashing algorithm:\n`;
     report += '`ID = "c" + md5(entityType + ":" + sourceId).substring(0, 24)`\n\n';
@@ -58,7 +58,7 @@ export function generateIdempotencyReport(data: any) {
 }
 
 export function generateHtmlSafetyReport() {
-    const reportPath = path.join(__dirname, '../../../../HTML_TRANSFORMATION_SAFETY_REPORT.md');
+    const reportPath = path.join(__dirname, '../../../../docs/migration-reports/HTML_TRANSFORMATION_SAFETY_REPORT.md');
     let report = `# HTML Transformation Safety Report\n\n`;
     report += `## Methodology\n`;
     report += `The migration uses **BeautifulSoup4 (Python)** for DOM-based HTML transformation during the extraction phase.\n\n`;

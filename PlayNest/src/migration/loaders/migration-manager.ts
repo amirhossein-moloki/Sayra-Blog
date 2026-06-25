@@ -131,7 +131,7 @@ export class MigrationManager {
   }
 
   private generateMediaIntegrityReport(mediaIntegrity: any) {
-      const reportPath = path.join(__dirname, '../../../../MEDIA_INTEGRITY_REPORT.md');
+      const reportPath = path.join(__dirname, '../../../../docs/migration-reports/MEDIA_INTEGRITY_REPORT.md');
       let report = `# Media Integrity Report\n\n`;
       report += `## Validation Results\n`;
       report += `- **Missing References:** ${mediaIntegrity.isValid ? 'None' : 'Issues Detected'}\n`;
