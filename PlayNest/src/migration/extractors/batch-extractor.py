@@ -2,7 +2,6 @@ import json
 import os
 import re
 import sqlite3
-import sys
 
 from bs4 import BeautifulSoup
 
