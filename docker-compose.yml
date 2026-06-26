@@ -1,19 +1,4 @@
 services:
-  # web:
-  #   build: .
-  #   command: sh -c "/usr/local/bin/docker-entrypoint.sh"
-  #   volumes:
-  #     - .:/app
-  #     - static_volume:/app/staticfiles
-  #     - media_volume:/app/media
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - db
-  #     - cache
-
   db:
     image: postgres:14
     volumes:
@@ -28,65 +13,6 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
-
-  # celery_high_priority:
-  #   build: .
-  #   command: celery -A blog worker -l info -Q high_priority
-  #   volumes:
-  #     - .:/app
-  #     - media_volume:/app/media
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     cache:
-  #       condition: service_healthy
-
-  # celery_default:
-  #   build: .
-  #   command: celery -A blog worker -l info -Q default
-  #   volumes:
-  #     - .:/app
-  #     - media_volume:/app/media
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     cache:
-  #       condition: service_healthy
-
-  # celery_low_priority:
-  #   build: .
-  #   command: celery -A blog worker -l info -Q low_priority
-  #   volumes:
-  #     - .:/app
-  #     - media_volume:/app/media
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     cache:
-  #       condition: service_healthy
-
-  # celery-beat:
-  #   build: .
-  #   command: celery -A blog beat -l info
-  #   volumes:
-  #     - .:/app
-  #     - media_volume:/app/media
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     cache:
-  #       condition: service_healthy
-
-  nginx:
-    build:
-      context: ./nginx
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    ports:
-      - "80:80"
-    depends_on:
-      - web
 
 volumes:
   postgres_data:
