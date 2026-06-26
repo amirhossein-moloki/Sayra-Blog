@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { pagesController } from './pages.controller';
-import validate from '../../common/middlewares/validate';
+import { validate } from '../../common/middleware/validate';
 import { createPageSchema, updatePageSchema, getPageByPathSchema } from './pages.validation';
-import auth from '../../common/middlewares/auth';
+import { auth } from '../../common/middleware/auth';
 
 const router = Router();
 
