@@ -6,7 +6,7 @@ import { MenuLocation } from '@prisma/client';
 
 export const navigationController = {
   createMenu: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     const menu = await navigationStation.createMenu(
       { ...req.body, gamingCenterId: req.gamingCenterId! },
@@ -20,13 +20,13 @@ export const navigationController = {
     const tree = await navigationStation.getMenuTree(
       req.params.location as MenuLocation,
       req.gamingCenterId!,
-      req.user as any
+      req.actor as any
     );
     res.send(tree);
   }),
 
   addMenuItem: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     const item = await navigationStation.addMenuItem(
       req.body,
@@ -38,7 +38,7 @@ export const navigationController = {
   }),
 
   updateMenuItem: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     const item = await navigationStation.updateMenuItem(
       req.params.id,
@@ -52,7 +52,7 @@ export const navigationController = {
   }),
 
   deleteMenuItem: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     await navigationStation.deleteMenuItem(
       req.params.id,

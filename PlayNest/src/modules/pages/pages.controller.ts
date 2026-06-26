@@ -5,7 +5,7 @@ import catchAsync from '../../common/utils/catchAsync';
 
 export const pagesController = {
   createPage: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     const page = await pagesStation.createPage(
       { ...req.body, gamingCenterId: req.gamingCenterId! },
@@ -16,7 +16,7 @@ export const pagesController = {
   }),
 
   updatePage: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     const page = await pagesStation.updatePage(
       req.params.id,
@@ -39,7 +39,7 @@ export const pagesController = {
   }),
 
   deletePage: catchAsync(async (req: Request, res: Response) => {
-    const actor = { id: req.user!.id, actorType: req.user!.actorType };
+    const actor = { id: req.actor!.id, actorType: req.actor!.actorType };
     const context = { ip: req.ip, userAgent: req.get('User-Agent') };
     await pagesStation.deletePage(req.params.id, req.gamingCenterId!, actor, context);
     res.status(httpStatus.NO_CONTENT).send();
