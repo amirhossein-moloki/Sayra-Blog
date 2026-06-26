@@ -63,12 +63,14 @@ def extract_in_batches(conn, table_name, batch_size=1000):
         for offset in range(0, total, batch_size):
             if POSTGRES_AVAILABLE and not isinstance(conn, sqlite3.Connection):
                 cursor.execute(
-                    f"SELECT * FROM {table_name} LIMIT %s OFFSET %s",
-                    (batch_size, offset),
+                    "SELECT * FROM %s LIMIT %s OFFSET %s" % (
+                        table_name, batch_size, offset
+                    )
                 )
             else:
                 cursor.execute(
-                    f"SELECT * FROM {table_name} LIMIT {batch_size} OFFSET {offset}"
+                    f"SELECT * FROM {table_name} LIMIT {batch_size} "
+                    f"OFFSET {offset}"
                 )
             yield [dict(row) for row in cursor.fetchall()]
 
@@ -117,7 +119,8 @@ def run_extraction():
             for batch in extract_in_batches(conn, table):
                 for row in batch:
                     for field in ["content", "excerpt", "bio"]:
-                        if field in row and row[field] and isinstance(row[field], str):
+                        if (field in row and row[field] and
+                                isinstance(row[field], str)):
                             if "<" in row[field] and ">" in row[field]:
                                 row[field] = transform_html_content(
                                     row[field], post_slug_map
@@ -125,7 +128,8 @@ def run_extraction():
                 data.extend(batch)
             all_data[table.split("_")[-1]] = data
 
-        with open(f"{output_dir}/{group.replace('_', '-')}.json", "w") as f:
+        fn = f"{group.replace('_', '-')}.json"
+        with open(os.path.join(output_dir, fn), "w") as f:
             json.dump(all_data, f, indent=2)
 
     conn.close()

@@ -29,7 +29,8 @@ def transform_html_content(html):
             match = re.search(r"/posts/detail/(\d+)/", href)
             if match:
                 post_id = match.group(1)
-                # In a real migration, we'd lookup the slug. For now, deterministic id-based slug.
+                # In a real migration, we'd lookup the slug.
+                # For now, deterministic id-based slug.
                 a["href"] = f"/posts/p-{post_id}"
 
     # 3. Attributes Cleanup
@@ -41,10 +42,14 @@ def transform_html_content(html):
             if attr.startswith("data-cke-"):
                 del tag[attr]
 
-    # Return as string (BeautifulSoup handles malformed HTML and produces valid output)
+    # Return as string (BeautifulSoup handles malformed HTML)
     return str(soup)
 
 
 if __name__ == "__main__":
-    sample_html = '<p>Check this <img src="/media/uploads/test.png" data-cke-saved-src="..."> and <a href="/posts/detail/42/">this link</a></p>'
+    sample_html = (
+        '<p>Check this <img src="/media/uploads/test.png" '
+        'data-cke-saved-src="..."> and <a href="/posts/detail/42/">'
+        'this link</a></p>'
+    )
     print(transform_html_content(sample_html))
