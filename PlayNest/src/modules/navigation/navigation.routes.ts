@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { navigationController } from './navigation.controller';
-import validate from '../../common/middlewares/validate';
+import { validate } from '../../common/middleware/validate';
 import { createMenuSchema, addMenuItemSchema, updateMenuItemSchema } from './navigation.validation';
-import auth from '../../common/middlewares/auth';
+import { auth } from '../../common/middleware/auth';
 
 const router = Router();
 

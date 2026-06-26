@@ -5,6 +5,10 @@ import { verifyToken } from '../../modules/auth/auth.tokens';
 import { env } from '../../config/env';
 import { prisma } from '../../config/prisma';
 
+export const auth = () => async (req: Request, res: Response, next: NextFunction) => {
+  return authMiddleware(req, res, next);
+};
+
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
