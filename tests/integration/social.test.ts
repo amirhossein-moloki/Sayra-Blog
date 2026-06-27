@@ -40,13 +40,12 @@ describe('Comments Module - Social Layer', () => {
     it('should calculate depth and rootId correctly for replies', async () => {
       jest.mocked(commentsRepository.countRecentByUser).mockResolvedValue(0);
       jest.mocked(commentsRepository.findDuplicate).mockResolvedValue(null);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       jest.mocked(commentsRepository.findById).mockResolvedValue({
         id: 'parent1',
         depth: 0,
         rootId: null,
       } as any);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.mocked(commentsRepository.create).mockImplementation((data: any) => Promise.resolve({ id: 'child1', ...data } as any));
 
       const result = await commentsStation.createComment(gamingCenterId, userId, {
@@ -62,12 +61,12 @@ describe('Comments Module - Social Layer', () => {
     it('should throw error if max depth is exceeded', async () => {
       jest.mocked(commentsRepository.countRecentByUser).mockResolvedValue(0);
       jest.mocked(commentsRepository.findDuplicate).mockResolvedValue(null);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       jest.mocked(commentsRepository.findById).mockResolvedValue({
         id: 'parent9',
         depth: 10,
         rootId: 'root1',
-      } as unknown as Record<string, unknown>);
+      } as any);
+      /* eslint-enable @typescript-eslint/no-explicit-any */
 
       await expect(commentsStation.createComment(gamingCenterId, userId, {
         postId: 'post1',

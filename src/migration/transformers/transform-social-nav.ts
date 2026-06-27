@@ -76,10 +76,12 @@ function mapCommentStatus(status: string) {
   return map[status] || 'PENDING';
 }
 
-function mapReactionType() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function mapReactionType(_type: string) {
   return 'LIKE';
 }
 
-function mapContentType() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function mapContentType(_id: number) {
   return 'post';
 }
