@@ -1,46 +1,39 @@
-name: CI
+name: Sevra CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main ]
 
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          cache: 'pip'
-          python-version: '3.12'
-      - name: Install dependencies
-        run: |
-          pip install black isort flake8
-      - name: Run Black
-        run: black --check .
-      - name: Run isort
-        run: isort --check-only .
-      - name: Run Flake8
-        run: flake8 .
+    strategy:
+      matrix:
+        node-version: [18.x]
 
-  test:
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: PlayNest/package-lock.json
-      - name: Install dependencies
-        run: |
-          cd PlayNest
-          npm install
-      - name: Run PlayNest Tests
-        run: |
-          cd PlayNest
-          npm test
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+
+    - name: Type Check
+      run: tsc --noEmit
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
