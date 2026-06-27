@@ -28,17 +28,17 @@ export const postsStation = {
     });
 
     if (!authorProfile) {
-       // Create an author profile if it doesn't exist for the user
-       const user = await prisma.user.findUnique({ where: { id: data.authorId } });
-       if (!user) {
-         throw new AppError('User not found', httpStatus.NOT_FOUND);
-       }
-       await prisma.authorProfile.create({
-         data: {
-           userId: user.id,
-           displayName: user.fullName,
-         }
-       });
+      // Create an author profile if it doesn't exist for the user
+      const user = await prisma.user.findUnique({ where: { id: data.authorId } });
+      if (!user) {
+        throw new AppError('User not found', httpStatus.NOT_FOUND);
+      }
+      await prisma.authorProfile.create({
+        data: {
+          userId: user.id,
+          displayName: user.fullName,
+        }
+      });
     }
 
     // Handle scheduling
@@ -118,7 +118,7 @@ export const postsStation = {
     }
 
     if (data.status === PageStatus.PUBLISHED && !post.publishedAt && !data.publishedAt) {
-        data.publishedAt = new Date();
+      data.publishedAt = new Date();
     }
 
     // HTML Sanitization

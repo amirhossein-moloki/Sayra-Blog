@@ -20,7 +20,7 @@ export const navigationController = {
     const tree = await navigationStation.getMenuTree(
       req.params.location as MenuLocation,
       req.gamingCenterId!,
-      req.actor as any
+      req.actor as { role: import('@prisma/client').UserRole }
     );
     res.send(tree);
   }),

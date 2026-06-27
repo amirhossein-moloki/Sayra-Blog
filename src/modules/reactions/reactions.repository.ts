@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma';
-import { ReactionType, Reaction, ReactionAggregate } from '@prisma/client';
+import { ReactionType, Reaction, Prisma } from '@prisma/client';
 
 export interface ToggleReactionResult {
   action: 'created' | 'updated' | 'removed';
@@ -76,7 +76,7 @@ export const reactionsRepository = {
   },
 
   async updateAggregate(
-    tx: any,
+    tx: Prisma.TransactionClient,
     gamingCenterId: string,
     contentType: string,
     objectId: string,

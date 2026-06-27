@@ -1,8 +1,11 @@
 import { IdMapper } from '../utils/id-mapper';
 import config from '../migration-config.json';
 
-export function transformIdentity(data: any) {
-  const transformedUsers = data.user.map((user: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function transformIdentity(data: Record<string, any[]>) {
+  // Using Record<string, any> for raw migration data from legacy source
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedUsers = data.user.map((user: Record<string, any>) => ({
     id: IdMapper.getOrCreate('User', user.id),
     gamingCenterId: config.gamingCenterId,
     username: user.username,
@@ -16,7 +19,8 @@ export function transformIdentity(data: any) {
     updatedAt: new Date(),
   }));
 
-  const transformedAuthors = data.authorprofile.map((author: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedAuthors = data.authorprofile.map((author: Record<string, any>) => ({
     userId: IdMapper.get('User', author.user_id),
     displayName: author.display_name,
     bio: author.bio,

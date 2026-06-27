@@ -1,6 +1,6 @@
 import { prisma } from '../../config/prisma';
 import { CreatePostInput, UpdatePostInput, CreateSeriesInput, UpdateSeriesInput } from './posts.types';
-import { Prisma, PageStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { ListPostsQuery } from './posts.validation';
 import { getPaginationParams, formatPaginatedResult } from '../../common/utils/pagination';
 
@@ -90,7 +90,8 @@ export const postsRepository = {
   },
 
   async updatePost(id: string, data: UpdatePostInput) {
-    const { tagIds, changeNote, ...postData } = data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tagIds, changeNote: _unused, ...postData } = data;
 
     return prisma.post.update({
       where: { id },

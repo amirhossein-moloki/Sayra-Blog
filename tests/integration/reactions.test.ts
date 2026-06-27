@@ -18,9 +18,10 @@ describe('Reactions Module - Social Layer', () => {
   describe('Reaction Rules', () => {
     it('should toggle a new reaction', async () => {
       const reaction = { id: 'r1', userId, type: ReactionType.LIKE, contentType: 'post', objectId: 'p1' };
-      (reactionsRepository.toggleReaction as any).mockResolvedValue({
+      jest.mocked(reactionsRepository.toggleReaction).mockResolvedValue({
         action: 'created',
-        reaction,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        reaction: reaction as any,
       });
 
       const result = await reactionsStation.toggleReaction(gamingCenterId, userId, {
@@ -35,9 +36,10 @@ describe('Reactions Module - Social Layer', () => {
 
     it('should change an existing reaction type', async () => {
       const reaction = { id: 'r1', userId, type: ReactionType.LOVE, contentType: 'post', objectId: 'p1' };
-      (reactionsRepository.toggleReaction as any).mockResolvedValue({
+      jest.mocked(reactionsRepository.toggleReaction).mockResolvedValue({
         action: 'updated',
-        reaction,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        reaction: reaction as any,
         oldType: ReactionType.LIKE,
       });
 
@@ -53,9 +55,10 @@ describe('Reactions Module - Social Layer', () => {
 
     it('should remove a reaction when same type is toggled', async () => {
       const reaction = { id: 'r1', userId, type: ReactionType.LIKE, contentType: 'post', objectId: 'p1' };
-      (reactionsRepository.toggleReaction as any).mockResolvedValue({
+      jest.mocked(reactionsRepository.toggleReaction).mockResolvedValue({
         action: 'removed',
-        reaction,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        reaction: reaction as any,
       });
 
       const result = await reactionsStation.toggleReaction(gamingCenterId, userId, {

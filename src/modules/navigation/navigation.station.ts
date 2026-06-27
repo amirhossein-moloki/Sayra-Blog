@@ -51,7 +51,7 @@ export const navigationStation = {
     const itemMap = new Map();
     filteredItems.forEach((item) => itemMap.set(item.id, { ...item, children: [] }));
 
-    const rootItems: any[] = [];
+    const rootItems: Record<string, unknown>[] = [];
     filteredItems.forEach((item) => {
       if (item.parentId && itemMap.has(item.parentId)) {
         itemMap.get(item.parentId).children.push(itemMap.get(item.id));

@@ -1,8 +1,11 @@
 import { IdMapper } from '../utils/id-mapper';
 import config from '../migration-config.json';
 
-export function transformMediaTaxonomy(data: any) {
-  const transformedMedia = data.media.map((m: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function transformMediaTaxonomy(data: Record<string, any[]>) {
+  // Using Record<string, any> for raw migration data from legacy source
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedMedia = data.media.map((m: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Media', m.id),
     gamingCenterId: config.gamingCenterId,
     type: (m.type || 'IMAGE').toUpperCase(),
@@ -20,7 +23,8 @@ export function transformMediaTaxonomy(data: any) {
     updatedAt: new Date(m.updated_at),
   }));
 
-  const transformedCategories = data.category.map((c: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedCategories = data.category.map((c: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Category', c.id),
     gamingCenterId: config.gamingCenterId,
     slug: c.slug,
@@ -33,7 +37,8 @@ export function transformMediaTaxonomy(data: any) {
     updatedAt: new Date(c.updated_at),
   }));
 
-  const transformedTags = data.tag.map((t: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedTags = data.tag.map((t: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Tag', t.id),
     gamingCenterId: config.gamingCenterId,
     slug: t.slug,
@@ -44,7 +49,8 @@ export function transformMediaTaxonomy(data: any) {
     updatedAt: new Date(t.updated_at),
   }));
 
-  const transformedSeries = data.series.map((s: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedSeries = data.series.map((s: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Series', s.id),
     gamingCenterId: config.gamingCenterId,
     slug: s.slug,

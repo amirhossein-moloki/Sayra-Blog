@@ -226,24 +226,26 @@ export const commentsStation = {
     };
   },
 
-  buildTree(root: any, descendants: any[]): CommentResponse {
+  buildTree(root: Record<string, unknown>, descendants: Record<string, unknown>[]): CommentResponse {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const commentMap = new Map<string, any>();
-    commentMap.set(root.id, { ...root, replies: [] });
+    commentMap.set(root.id as string, { ...root, replies: [] });
 
     descendants.forEach(d => {
-      commentMap.set(d.id, { ...d, replies: [] });
+      commentMap.set(d.id as string, { ...d, replies: [] });
     });
 
-    const rootNode = commentMap.get(root.id);
+    const rootNode = commentMap.get(root.id as string);
 
     descendants.forEach(d => {
-      const parent = commentMap.get(d.parentId);
+      const parent = commentMap.get(d.parentId as string);
       if (parent) {
         if (!parent.replies) parent.replies = [];
-        parent.replies.push(commentMap.get(d.id));
+        parent.replies.push(commentMap.get(d.id as string));
       }
     });
 
     return rootNode;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   }
 };

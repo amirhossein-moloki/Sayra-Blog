@@ -1,4 +1,4 @@
-import { Worker, Job } from 'bullmq';
+import { Worker } from 'bullmq';
 import { defaultQueueOptions } from '../../config/bullmq';
 import { CMS_PUBLISH_QUEUE_NAME } from '../queues';
 import { prisma } from '../../config/prisma';
@@ -8,7 +8,7 @@ import { eventEmitter } from '../../common/events/event-emitter';
 
 export const scheduledPostPublisherWorker = new Worker(
   CMS_PUBLISH_QUEUE_NAME,
-  async (job: Job) => {
+  async () => {
     logger.info('Checking for scheduled posts to publish...');
 
     const now = new Date();

@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { env } from '../../config/env';
 
 class ShadowEventEmitter extends EventEmitter {
-  emit(eventName: string | symbol, ...args: any[]): boolean {
+  emit(eventName: string | symbol, ...args: unknown[]): boolean {
     if (env.SHADOW_MODE) {
       console.log(`[SHADOW MODE] Suppressing event: ${String(eventName)}`, args);
       return true;

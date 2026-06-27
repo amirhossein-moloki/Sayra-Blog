@@ -44,7 +44,7 @@ export const pagesRepository = {
     });
   },
 
-  async findAllPages(gamingCenterId: string, filter: any) {
+  async findAllPages(gamingCenterId: string, filter: Record<string, unknown>) {
     return prisma.page.findMany({
       where: {
         gamingCenterId,
