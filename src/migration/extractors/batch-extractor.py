@@ -80,7 +80,7 @@ def extract_in_batches(conn, table_name, batch_size=1000):
 
 def run_extraction():
     conn = get_connection()
-    output_dir = "PlayNest/src/migration/data-temp"
+    output_dir = "src/migration/data-temp"
     os.makedirs(output_dir, exist_ok=True)
 
     # 1. Build Slug Map for SEO-aware transformation
