@@ -63,9 +63,8 @@ def extract_in_batches(conn, table_name, batch_size=1000):
         for offset in range(0, total, batch_size):
             if POSTGRES_AVAILABLE and not isinstance(conn, sqlite3.Connection):
                 cursor.execute(
-                    "SELECT * FROM %s LIMIT %s OFFSET %s" % (
-                        table_name, batch_size, offset
-                    )
+                    "SELECT * FROM %s LIMIT %s OFFSET %s"
+                    % (table_name, batch_size, offset)
                 )
             else:
                 cursor.execute(
@@ -119,8 +118,11 @@ def run_extraction():
             for batch in extract_in_batches(conn, table):
                 for row in batch:
                     for field in ["content", "excerpt", "bio"]:
-                        if (field in row and row[field] and
-                                isinstance(row[field], str)):
+                        if (
+                            field in row
+                            and row[field]
+                            and isinstance(row[field], str)
+                        ):
                             if "<" in row[field] and ">" in row[field]:
                                 row[field] = transform_html_content(
                                     row[field], post_slug_map
