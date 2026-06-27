@@ -1,164 +1,146 @@
-# Blog Platform — Enterprise-Grade Content Management System
+# Playenest | پلتفرم مدیریت و رزرو گیم‌نت
 
-## Project Overview
-The **Blog Platform** is a production-ready, modular Django-based content management system designed for high-performance publishing workflows. It provides a robust backend for managing complex content lifecycles, user engagements, and centralized media assets with automated optimization.
+Playenest is a specialized Gamenet Management & Reservation system. It provides a robust API for managing gaming centers, stations (PC, Console, VR), staff shifts, and online/walk-in reservations.
 
-### Purpose
-To provide a scalable, secure, and developer-friendly foundation for modern blogs and news portals that require fine-grained access control, scheduled publishing, and rich media handling.
-
-### Problem Solved
-- **Content Lifecycle Management:** Handles the transition from draft to review, scheduled, and published states.
-- **Media Inefficiency:** Automates image conversion to AVIF and video compression using FFmpeg to ensure fast load times.
-- **Fragmented User Management:** Integrates standard JWT authentication with Google OAuth2 and Iranian-specific localized features (Jalali dates).
-- **Scalability:** Built with a modular architecture that separates core concerns (Interactions, Navigation, Medias, Pages).
+[![Node.js Version](https://img.shields.io/badge/node-18.x-blue.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.x-teal.svg)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
 
 ---
 
-## Main Features
+## 🚀 Key Features | ویژگی‌های کلیدی
 
-### 🔐 User & Identity Management
-- **JWT Authentication:** Secure token-based access with refresh mechanisms.
-- **Social Integration:** One-click login via Google OAuth2.
-- **RBAC (Role-Based Access Control):** Predefined roles for Admins, Authors, and Users.
-- **Profile Management:** Optimized profile pictures and biography tracking.
-
-### ✍️ Advanced Publishing Engine
-- **Rich Text Editing:** Integrated CKEditor 5 with image upload support.
-- **Post Scheduling:** Automated publishing of scheduled content via Celery.
-- **Versioning:** Historical revision tracking for all post edits.
-- **Taxonomies:** Hierarchical categories, tags, and series management.
-
-### 🖼️ Centralized Media Library
-- **Automatic Optimization:** Real-time AVIF conversion and resizing for images.
-- **Async Processing:** Background video optimization using FFmpeg.
-- **Smart Linking:** Automatically syncs media attachments by parsing post content.
-
-### 💬 Engagement & Interactions
-- **Nested Comments:** Support for threaded discussions with moderation workflows.
-- **Generic Reactions:** Extensible "Like" and Emoji system applicable to any content.
+- **Gaming Center Management**: Handle multiple centers, each with its own settings, pricing, and rules.
+- **Smart Station Control**: Manage PCs, Consoles (PS5, Xbox), and VR stations with VIP/Normal tiers.
+- **Reservation Engine**: Real-time availability, preventing overlaps, and support for Online, Walk-in, and Phone bookings.
+- **Staff & Shift Management**: Role-based access control (RBAC) and scheduling for staff members.
+- **Financials & Payments**: Integrated with Zarinpal for online payments, wallet system, and commission tracking.
+- **CMS & SEO**: Built-in site builder to generate public-facing pages for each gaming center.
+- **Analytics**: Detailed reporting on revenue, occupancy, and staff performance.
 
 ---
 
-## Technology Stack
+## 🛠 Tech Stack | تکنولوژی‌های مورد استفاده
 
-| Component | Technology |
-| :--- | :--- |
-| **Backend** | Django 5.0.6 (Python 3.12) |
-| **API Framework** | Django REST Framework (DRF) |
-| **Database** | PostgreSQL 14 |
-| **Task Queue** | Celery + Redis |
-| **Real-time** | Django Channels (ASGI) |
-| **Reverse Proxy** | Nginx |
-| **Containerization** | Docker + Docker Compose |
-| **Admin UI** | Unfold (Modern Django Admin) |
-| **Documentation** | drf-spectacular (OpenAPI 3.0) |
+- **Backend**: Node.js, Express, TypeScript
+- **Database**: PostgreSQL (ORM: Prisma)
+- **Caching & Queues**: Redis, BullMQ
+- **Validation**: Zod
+- **Security**: Argon2, JWT, Helmet
+- **Logging**: Pino
+- **Testing**: Jest, Supertest, Playwright
 
 ---
 
-## Architecture Summary
-The system follows a **Modular Monolith** architecture. Each domain (Users, Posts, Medias, etc.) is isolated into its own Django application with dedicated models, services, and APIs.
+## 🚦 Getting Started | راهنمای راه‌اندازی
 
-```mermaid
-graph TD
-    subgraph APILayer ["API Layer"]
-        DRF[DRF ViewSets & APIViews]
-        Spectacular[drf-spectacular]
-    end
+Follow these steps to get the project running on your local machine.
 
-    subgraph BusinessLogic ["Business Logic"]
-        Services[Service Layer]
-        Tasks[Celery Tasks]
-    end
+### 1. Prerequisites
+- **Node.js** (v18 or higher)
+- **Docker & Docker Compose** (recommended for DB and Redis)
 
-    subgraph CoreDomains ["Core Domains"]
-        Users[Users App]
-        Posts[Posts App]
-        Medias[Medias App]
-        Interactions[Interactions App]
-    end
-
-    subgraph DataLayer ["Data Layer"]
-        DB[(PostgreSQL)]
-        Cache[(Redis)]
-        Storage[S3 / Local Storage]
-    end
-
-    DRF --> Services
-    Services --> CoreDomains
-    Services --> Tasks
-    CoreDomains --> DB
-    CoreDomains --> Storage
-    Tasks --> DB
-    Tasks --> Cache
-```
-
-### Service Boundaries
-- `users`: Identity, Authentication, and Permissions.
-- `posts`: Content engine, Taxonomies, and Revisions.
-- `medias`: Centralized asset storage and processing.
-- `interactions`: Social features (Comments, Reactions).
-- `navigation` & `pages`: CMS structural components.
-
----
-
-## Quick Start
-
-### Requirements
-- Docker and Docker Compose
-- Python 3.12+ (for local development)
-- PostgreSQL & Redis (for local development)
-
-### Docker Setup (Recommended)
-1. **Clone & Configure:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your credentials (ensure STATIC_API_KEY is set)
-   ```
-2. **Build & Launch:**
-   ```bash
-   docker-compose up --build
-   ```
-3. **Initialize:**
-   ```bash
-   docker-compose exec web python manage.py migrate
-   docker-compose exec web python manage.py createsuperuser
-   ```
-
-### Local Installation
-1. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **Run Migrations:**
-   ```bash
-   python manage.py migrate
-   ```
-3. **Start Server:**
-   ```bash
-   python manage.py runserver
-   ```
-
----
-
-## API & Documentation
-The API follows RESTful principles with standardized JSON responses:
-```json
-{
-  "data": { ... },
-  "messagesList": [],
-  "pagination": { ... }
-}
-```
-
-- **Swagger UI:** `/api/schema/swagger-ui/`
-- **Redoc:** `/api/schema/redoc/`
-- **OpenAPI Spec:** `/api/schema/`
-
----
-
-## Testing
-Run the full test suite (Unit + Integration):
+### 2. Installation
 ```bash
-python manage.py test
+# Clone the repository
+git clone https://github.com/your-repo/playenest.git
+cd playenest
+
+# Install dependencies
+npm install
 ```
-Target coverage: **95%+**
+
+### 3. Environment Setup
+Copy the example environment file and update it with your credentials:
+```bash
+cp .env.example .env
+```
+*(Make sure to update `DATABASE_URL` and `REDIS_URL` if they differ from the defaults).*
+
+### 4. Running with Docker (Recommended)
+The easiest way to start the entire stack (App, DB, and Redis) is using Docker Compose:
+```bash
+docker compose up -d --build
+```
+This will build the app image, run migrations, and start all services. The API will be available at `http://localhost:3000`.
+
+### 5. Manual Setup (Development)
+If you prefer to run the app locally and only use Docker for infrastructure:
+```bash
+# Start DB and Redis
+docker compose up -d db redis
+
+# Initialize database
+npx prisma migrate dev
+npx prisma generate
+```
+
+For a full guide on how to run the project **without Docker**, see [Local Setup Guide (Persian)](docs/LOCAL_SETUP_GUIDE_FA.md).
+
+### 6. Seeding Data (Optional)
+To populate the database with professional test data:
+```bash
+npm run db:seed
+```
+
+### 7. Running the Application
+```bash
+# Development mode
+npm run dev
+
+# Production build
+npm run build
+npm start
+```
+
+The API will be available at `http://localhost:3000/api/v1`.
+Swagger documentation is available at `http://localhost:3000/api-docs`.
+
+---
+
+## 🧪 Testing | تست‌ها
+
+We maintain a high standard of quality with multiple testing layers:
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:cov
+
+# Run E2E tests only
+npm run test:e2e
+```
+
+---
+
+## 📚 Documentation | مستندات
+
+Detailed documentation is available in the `docs/` folder:
+- [Architecture Overview](docs/architecture.md)
+- [API Reference](docs/api.md)
+- [Database Schema](docs/database.md)
+- [Persian API Guide (راهنمای فارسی)](docs/API_GUIDE_FA.md)
+- [Docker Guide (راهنمای داکر)](docs/DOCKER_GUIDE_FA.md)
+
+---
+
+## 🇮🇷 راهنمای سریع (Persian Summary)
+
+پروژه **Playenest** یک سیستم جامع مدیریت گیم‌نت است که شامل مدیریت سیستم رزرو، مدیریت ایستگاه‌ها (PC/Console)، مدیریت شیفت کارکنان و درگاه پرداخت است.
+
+**نحوه اجرا:**
+۱. اجرای کل پروژه با داکر: `docker compose up -d --build`
+۲. (اختیاری) اجرای دستی:
+   - نصب پکیج‌ها: `npm install`
+   - تنظیم فایل `.env`: `cp .env.example .env`
+   - اجرای زیرساخت: `docker compose up -d db redis`
+   - بروزرسانی دیتابیس: `npx prisma migrate dev`
+   - اجرای پروژه: `npm run dev`
+
+برای راهنمای کامل اجرای پروژه **بدون داکر**، [اینجا را کلیک کنید](docs/LOCAL_SETUP_GUIDE_FA.md).
+
+---
+
