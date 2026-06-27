@@ -15,8 +15,8 @@ describe('Enhanced Abuse Prevention', () => {
   });
 
   it('should detect duplicate comment with whitespace and case variations', async () => {
-    (commentsRepository.countRecentByUser as any).mockResolvedValue(0);
-    (commentsRepository.findDuplicate as any).mockImplementation((uid: string, pid: string, content: string) => {
+    jest.mocked(commentsRepository.countRecentByUser).mockResolvedValue(0);
+    jest.mocked(commentsRepository.findDuplicate).mockImplementation((_uid, _pid, content) => {
       if (content === 'hello world') return Promise.resolve({ id: 'existing' });
       return Promise.resolve(null);
     });

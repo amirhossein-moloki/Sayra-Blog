@@ -1,8 +1,11 @@
 import { IdMapper } from '../utils/id-mapper';
 import config from '../migration-config.json';
 
-export function transformContent(data: any) {
-  const transformedPosts = data.post.map((p: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function transformContent(data: Record<string, any[]>) {
+  // Using Record<string, any> for raw migration data from legacy source
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedPosts = data.post.map((p: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Post', p.id),
     gamingCenterId: config.gamingCenterId,
     slug: p.slug,
@@ -29,7 +32,8 @@ export function transformContent(data: any) {
     updatedAt: new Date(p.updated_at),
   }));
 
-  const transformedRevisions = data.revision.map((r: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedRevisions = data.revision.map((r: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Revision', r.id),
     postId: IdMapper.get('Post', r.post_id),
     editorId: r.editor_id ? IdMapper.get('User', r.editor_id) : null,
@@ -42,7 +46,8 @@ export function transformContent(data: any) {
     updatedAt: new Date(r.updated_at),
   }));
 
-  const transformedPages = data.page.map((pg: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedPages = data.page.map((pg: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Page', pg.id),
     gamingCenterId: config.gamingCenterId,
     slug: pg.slug,
@@ -58,12 +63,14 @@ export function transformContent(data: any) {
     updatedAt: new Date(pg.updated_at),
   }));
 
-  const transformedPostTags = data.posttag.map((pt: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedPostTags = data.posttag.map((pt: Record<string, any>) => ({
     postId: IdMapper.get('Post', pt.post_id),
     tagId: IdMapper.get('Tag', pt.tag_id),
   }));
 
-  const transformedPostMedia = data.postmedia.map((pm: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedPostMedia = data.postmedia.map((pm: Record<string, any>) => ({
     id: IdMapper.getOrCreate('PostMedia', pm.id),
     postId: IdMapper.get('Post', pm.post_id),
     mediaId: IdMapper.get('Media', pm.media_id),

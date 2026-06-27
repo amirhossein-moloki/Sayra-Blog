@@ -1,8 +1,11 @@
 import { IdMapper } from '../utils/id-mapper';
 import config from '../migration-config.json';
 
-export function transformSocialNav(data: any) {
-  const transformedComments = data.comment.map((c: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function transformSocialNav(data: Record<string, any[]>) {
+  // Using Record<string, any> for raw migration data as it's from a legacy source with inconsistent schema
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedComments = data.comment.map((c: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Comment', c.id),
     gamingCenterId: config.gamingCenterId,
     postId: IdMapper.get('Post', c.post_id),
@@ -17,7 +20,8 @@ export function transformSocialNav(data: any) {
     updatedAt: new Date(c.updated_at),
   }));
 
-  const transformedReactions = data.reaction.map((r: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedReactions = data.reaction.map((r: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Reaction', r.id),
     gamingCenterId: config.gamingCenterId,
     userId: IdMapper.get('User', r.user_id),
@@ -29,7 +33,8 @@ export function transformSocialNav(data: any) {
     updatedAt: new Date(r.updated_at),
   }));
 
-  const transformedMenus = data.menu.map((m: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedMenus = data.menu.map((m: Record<string, any>) => ({
     id: IdMapper.getOrCreate('Menu', m.id),
     gamingCenterId: config.gamingCenterId,
     name: m.name,
@@ -39,7 +44,8 @@ export function transformSocialNav(data: any) {
     updatedAt: new Date(m.updated_at),
   }));
 
-  const transformedMenuItems = data.menuitem.map((mi: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedMenuItems = data.menuitem.map((mi: Record<string, any>) => ({
     id: IdMapper.getOrCreate('MenuItem', mi.id),
     menuId: IdMapper.get('Menu', mi.menu_id),
     parentId: mi.parent_id ? IdMapper.getOrCreate('MenuItem', mi.parent_id) : null,
@@ -61,7 +67,7 @@ export function transformSocialNav(data: any) {
 }
 
 function mapCommentStatus(status: string) {
-  const map: any = {
+  const map: Record<string, string> = {
     'approved': 'APPROVED',
     'pending': 'PENDING',
     'spam': 'REJECTED',
@@ -70,10 +76,12 @@ function mapCommentStatus(status: string) {
   return map[status] || 'PENDING';
 }
 
-function mapReactionType(type: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function mapReactionType(_type: string) {
   return 'LIKE';
 }
 
-function mapContentType(id: number) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function mapContentType(_id: number) {
   return 'post';
 }

@@ -6,13 +6,16 @@ describe('Shadow Mode Event Suppression', () => {
   const originalShadowMode = env.SHADOW_MODE;
 
   afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (env as any).SHADOW_MODE = originalShadowMode;
     eventEmitter.removeAllListeners();
   });
 
   it('should suppress events when SHADOW_MODE is true', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (env as any).SHADOW_MODE = true;
     const callback = jest.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventEmitter.on(AppEvents.COMMENT_CREATED, callback as any);
 
     const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -29,8 +32,10 @@ describe('Shadow Mode Event Suppression', () => {
   });
 
   it('should emit events when SHADOW_MODE is false', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (env as any).SHADOW_MODE = false;
     const callback = jest.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventEmitter.on(AppEvents.COMMENT_CREATED, callback as any);
 
     eventEmitter.emit(AppEvents.COMMENT_CREATED, { id: '123' });

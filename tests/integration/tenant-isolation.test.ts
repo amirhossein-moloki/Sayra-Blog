@@ -20,11 +20,12 @@ describe('Multi-Tenant Boundary Tests', () => {
 
   describe('Comments Tenant Isolation', () => {
     it('should not allow replying to a comment from another tenant', async () => {
-      (commentsRepository.countRecentByUser as any).mockResolvedValue(0);
-      (commentsRepository.findDuplicate as any).mockResolvedValue(null);
-      (commentsRepository.findById as any).mockImplementation((id: string, gcId: string) => {
+      jest.mocked(commentsRepository.countRecentByUser).mockResolvedValue(0);
+      jest.mocked(commentsRepository.findDuplicate).mockResolvedValue(null);
+      jest.mocked(commentsRepository.findById).mockImplementation((id: string, gcId: string) => {
         if (id === 'comment-b' && gcId === TENANT_A) return Promise.resolve(null);
-        if (id === 'comment-b' && gcId === TENANT_B) return Promise.resolve({ id: 'comment-b', gamingCenterId: TENANT_B, depth: 0 });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (id === 'comment-b' && gcId === TENANT_B) return Promise.resolve({ id: 'comment-b', gamingCenterId: TENANT_B, depth: 0 } as any);
         return Promise.resolve(null);
       });
 
@@ -36,9 +37,11 @@ describe('Multi-Tenant Boundary Tests', () => {
     });
 
     it('should not allow fetching comment tree of another tenant', async () => {
-      (commentsRepository.findRootsPaginated as any).mockImplementation((gcId: string) => {
-        if (gcId !== TENANT_A) return Promise.resolve({ data: [], meta: {} });
-        return Promise.resolve({ data: [{ id: 'root-a' }], meta: {} });
+      jest.mocked(commentsRepository.findRootsPaginated).mockImplementation((gcId: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (gcId !== TENANT_A) return Promise.resolve({ data: [], meta: {} } as any);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return Promise.resolve({ data: [{ id: 'root-a' }], meta: {} } as any);
       });
 
       const result = await commentsStation.getCommentTree(TENANT_B, 'post-a', 1, 10);
@@ -48,7 +51,7 @@ describe('Multi-Tenant Boundary Tests', () => {
 
   describe('Reactions Tenant Isolation', () => {
     it('should ensure aggregates are filtered by tenant', async () => {
-      (reactionsRepository.getAggregates as any).mockImplementation((gcId: string) => {
+      jest.mocked(reactionsRepository.getAggregates).mockImplementation((gcId: string) => {
         if (gcId !== TENANT_A) return Promise.resolve({});
         return Promise.resolve({ LIKE: 10 });
       });

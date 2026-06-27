@@ -16,12 +16,12 @@ describe('Reaction Concurrency & Consistency', () => {
   });
 
   it('should maintain consistency during reaction type change', async () => {
-    const oldReaction = { id: 'r1', userId, type: ReactionType.LIKE, contentType: 'post', objectId: 'p1' };
     const newReaction = { id: 'r1', userId, type: ReactionType.LOVE, contentType: 'post', objectId: 'p1' };
 
-    (reactionsRepository.toggleReaction as any).mockResolvedValue({
+    jest.mocked(reactionsRepository.toggleReaction).mockResolvedValue({
       action: 'updated',
-      reaction: newReaction,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      reaction: newReaction as any,
       oldType: ReactionType.LIKE,
     });
 

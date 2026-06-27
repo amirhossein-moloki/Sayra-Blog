@@ -160,7 +160,7 @@ export const pagesStation = {
     return false;
   },
 
-  async listPages(gamingCenterId: string, filter: any) {
+  async listPages(gamingCenterId: string, filter: Record<string, unknown>) {
     return pagesRepository.findAllPages(gamingCenterId, filter);
   },
 

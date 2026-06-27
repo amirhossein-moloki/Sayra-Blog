@@ -1,4 +1,4 @@
-import { Post, Series, Revision, PageStatus, PostVisibility, SeriesOrderStrategy } from '@prisma/client';
+import { PageStatus, PostVisibility, SeriesOrderStrategy } from '@prisma/client';
 
 export type CreatePostInput = {
   gamingCenterId: string;
