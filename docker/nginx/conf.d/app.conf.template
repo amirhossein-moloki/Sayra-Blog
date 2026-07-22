@@ -6,7 +6,7 @@ upstream backend {
 limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
 
 server {
-    listen 80;
+    listen 8080;
     server_name _;
 
     # Security Headers

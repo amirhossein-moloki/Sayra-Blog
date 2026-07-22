@@ -1,13 +1,15 @@
+version: '3.8'
+
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-playnest_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_secure_password_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-playnest_prod}
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -15,12 +17,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:alpine
     restart: always
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -28,6 +42,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   app:
     image: playnest-app:latest
@@ -47,11 +73,71 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-playnest_admin}:${POSTGRES_PASSWORD:-change_this_secure_password_in_production}@db:5432/${POSTGRES_DB:-playnest_prod}
       - REDIS_URL=redis://redis:6379
+      - DISABLE_WORKERS=true
+      - DISABLE_HTTP=false
     volumes:
       - app_storage:/app/storage
-    command: ["sh", "-c", "./scripts/migrate.sh && node dist/server.js"]
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    networks:
+      - frontend_net
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    image: playnest-app:latest
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-playnest_admin}:${POSTGRES_PASSWORD:-change_this_secure_password_in_production}@db:5432/${POSTGRES_DB:-playnest_prod}
+      - REDIS_URL=redis://redis:6379
+      - DISABLE_WORKERS=false
+      - DISABLE_HTTP=true
+    volumes:
+      - app_storage:/app/storage
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    networks:
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: playnest-nginx:latest
@@ -60,13 +146,34 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - '80:80'
+      - '80:8080'
     environment:
       - MEDIA_LOCAL_PUBLIC_PATH=/media
     volumes:
       - app_storage:/app/storage:ro
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/log/nginx
+    cap_drop:
+      - ALL
     depends_on:
       - app
+    networks:
+      - frontend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backup:
     image: playnest-backup:latest
@@ -84,7 +191,7 @@ services:
     environment:
       - POSTGRES_HOST=db
       - RESTIC_REPOSITORY=/backups
-      - BACKUP_CRON=0 * * * *
+      - BACKUP_CRON_INTERVAL=3600
       - RETENTION_HOURLY=24
       - RETENTION_DAILY=7
       - RETENTION_WEEKLY=4
@@ -94,18 +201,39 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     volumes:
       - app_storage:/storage:ro
       - redis_data:/redis_data:ro
       - ./docker/nginx:/nginx_config:ro
-      - ./backups:/backups
+      - backup_volume:/backups
       - backup_data:/data
-      - .env:/.env:ro
+      - .env:/config/.env:ro
       - ./docker-compose.yml:/project_root/docker-compose.yml:ro
       - ./package.json:/project_root/package.json:ro
+    networks:
+      - backend_net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
   redis_data:
   app_storage:
   backup_data:
+  backup_volume:
+
+networks:
+  frontend_net:
+  backend_net:
