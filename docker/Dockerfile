@@ -50,17 +50,17 @@ RUN apt-get update && \
         libvips \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy build artifacts and production dependencies
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/scripts ./scripts
+# Copy build artifacts and production dependencies with proper ownership
+COPY --from=builder --chown=appuser:appuser /app/dist ./dist
+COPY --from=builder --chown=appuser:appuser /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appuser /app/package*.json ./
+COPY --from=builder --chown=appuser:appuser /app/prisma ./prisma
+COPY --from=builder --chown=appuser:appuser /app/scripts ./scripts
 
 # Ensure scripts are executable
 RUN chmod +x scripts/*.sh
 
-# Create storage directory for local media driver
+# Create storage directory and ensure it has correct permissions
 RUN mkdir -p storage/media && chown -R appuser:appuser storage
 
 USER appuser
