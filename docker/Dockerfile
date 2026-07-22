@@ -1,11 +1,14 @@
-# Stage 1: Base & Dependencies
+# Stage 1: Base image with non-root appuser
 FROM node:22-slim AS base
 
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
 
 WORKDIR /app
 
-# Install system dependencies needed for prisma and native modules (argon2/bcrypt/sharp)
+# Stage 2: Builder stage for compiling dependencies and building the app
+FROM base AS builder
+
+# Install system dependencies needed for prisma and native modules (argon2/bcrypt/sharp) at build time
 RUN apt-get update && \
     apt-get install -y \
         openssl \
@@ -14,9 +17,6 @@ RUN apt-get update && \
         g++ \
         libvips-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Stage 2: Builder
-FROM base AS builder
 
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -39,12 +39,10 @@ RUN npm run build
 # Remove development dependencies to keep the image slim
 RUN npm prune --production
 
-# Stage 3: Runtime
-FROM node:22-slim AS runtime
+# Stage 3: Runtime stage, extending from base to retain appuser
+FROM base AS runtime
 
-WORKDIR /app
-
-# Install runtime system dependencies
+# Install runtime-only system dependencies
 RUN apt-get update && \
     apt-get install -y \
         openssl \
