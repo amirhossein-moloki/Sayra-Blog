@@ -1,15 +1,22 @@
 FROM alpine:3.18
 
-# Install dependencies
-RUN apk add --no-cache \
-    restic \
-    postgresql-client \
-    redis \
-    bash \
-    curl \
-    rclone \
-    ca-certificates \
-    tzdata
+# Install dependencies with dynamic mirror fallback to handle regional CDN network issues
+RUN for mirror in "dl-cdn.alpinelinux.org" "mirrors.ustc.edu.cn" "mirrors.aliyun.com" "uk.alpinelinux.org"; do \
+        echo "Trying mirror: $mirror"; \
+        echo "http://$mirror/alpine/v3.18/main" > /etc/apk/repositories && \
+        echo "http://$mirror/alpine/v3.18/community" >> /etc/apk/repositories && \
+        apk update --no-cache && \
+        apk add --no-cache \
+            restic \
+            postgresql-client \
+            redis \
+            bash \
+            curl \
+            rclone \
+            ca-certificates \
+            tzdata && \
+        break || echo "Failed package installation with mirror: $mirror"; \
+    done
 
 # Create backup and system directories
 RUN mkdir -p /backups /scripts /data /config /storage /redis_data /nginx_config /project_root /var/log
