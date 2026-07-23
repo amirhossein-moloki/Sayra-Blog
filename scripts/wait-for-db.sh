@@ -16,4 +16,7 @@ until pg_isready -h "$host" -p "$port"; do
 done
 
 >&2 echo "Postgres is up - executing command"
+if [ "$#" -ge 2 ]; then
+  shift 2
+fi
 exec "$@"
