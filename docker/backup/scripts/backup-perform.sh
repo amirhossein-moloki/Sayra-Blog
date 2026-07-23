@@ -15,7 +15,7 @@ echo "Backing up PostgreSQL database..."
 
 # 3. Handle Redis (Save RDB to disk before backup)
 echo "Triggering Redis BGSAVE..."
-redis-cli -h redis BGSAVE || echo "Warning: Redis BGSAVE failed, continuing with existing RDB if present."
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis BGSAVE || echo "Warning: Redis BGSAVE failed, continuing with existing RDB if present."
 
 # 4. Run Restic Backup
 # We back up:

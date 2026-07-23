@@ -40,6 +40,9 @@ app.use(helmet({
 // Serve static files from the uploads directory
 app.use('/uploads', express.static('uploads'));
 
+// Serve static files from the local storage root
+app.use(env.MEDIA_LOCAL_PUBLIC_PATH, express.static(env.MEDIA_LOCAL_ROOT));
+
 import loggerMiddleware from './common/middleware/logger';
 
 // Disable pino-http logger in test environment to avoid Jest compatibility issues

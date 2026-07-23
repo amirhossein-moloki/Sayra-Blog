@@ -17,6 +17,8 @@ jest.mock('../src/config/env', () => ({
     JWT_ACCESS_EXPIRES_IN: '15m',
     SMSIR_OTP_TEMPLATE_ID: 123456,
     LOG_LEVEL: 'silent',
+    MEDIA_LOCAL_PUBLIC_PATH: '/media',
+    MEDIA_LOCAL_ROOT: 'storage',
   },
 }));
 

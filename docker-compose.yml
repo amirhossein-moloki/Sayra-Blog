@@ -89,7 +89,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /app/logs:rw
+      - /app/logs:rw,uid=10001,gid=10001,mode=0755
     cap_drop:
       - ALL
     cap_add:
@@ -132,7 +132,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /app/logs:rw
+      - /app/logs:rw,uid=10001,gid=10001,mode=0755
     cap_drop:
       - ALL
     cap_add:
@@ -216,6 +216,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-playnest_prod}
       - POSTGRES_HOST=db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-change_this_secure_password_in_production}@redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-change_this_secure_password_in_production}
       - BACKUP_CRON_INTERVAL=3600
     volumes:
       - app_storage:/storage:ro
@@ -229,7 +230,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /var/log:rw
+      - /var/log:rw,uid=10002,gid=10002,mode=0755
     cap_drop:
       - ALL
     cap_add:

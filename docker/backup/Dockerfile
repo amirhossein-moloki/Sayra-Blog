@@ -22,7 +22,7 @@ RUN for mirror in "dl-cdn.alpinelinux.org" "mirrors.ustc.edu.cn" "mirrors.aliyun
 RUN mkdir -p /backups /scripts /data /config /storage /redis_data /nginx_config /project_root /var/log
 
 # Create a non-root group and user
-RUN addgroup -S backupuser && adduser -S -G backupuser backupuser
+RUN addgroup -S -g 10002 backupuser && adduser -S -u 10002 -G backupuser backupuser
 
 # Copy scripts
 COPY scripts/ /scripts/
