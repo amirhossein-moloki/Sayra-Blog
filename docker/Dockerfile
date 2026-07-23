@@ -60,13 +60,12 @@ COPY --from=builder --chown=appuser:appuser /app/scripts ./scripts
 # Ensure scripts are executable
 RUN chmod +x scripts/*.sh
 
-# Create storage directory and ensure it has correct permissions
-RUN mkdir -p storage/media && chown -R appuser:appuser storage
+# Create storage and logs directory and ensure they have correct permissions
+RUN mkdir -p storage/media logs && chown -R appuser:appuser storage logs
 
 USER appuser
 
 EXPOSE 3000
 
-# Use wait-for-db script by default in production
-# The actual command will be overridden in docker-compose for flexibility
-CMD ["./scripts/wait-for-db.sh", "db", "node", "dist/server.js"]
+# Use the SRE production start script by default
+CMD ["./scripts/start-production.sh"]
