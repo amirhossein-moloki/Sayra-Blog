@@ -110,6 +110,9 @@ services:
 
   worker:
     image: playnest-app:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     restart: always
     depends_on:
       db:

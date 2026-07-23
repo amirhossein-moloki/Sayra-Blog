@@ -15,9 +15,9 @@ gzip $DUMP_FILE
 
 echo "Database dump completed: $COMPRESSED_FILE"
 
-# Move to the data directory for restic to pick up
-mkdir -p /data/db
-mv $COMPRESSED_FILE /data/db/latest.sql.gz
+# Move to the writeable temp directory for restic to pick up
+mkdir -p /tmp/db_dumps
+mv $COMPRESSED_FILE /tmp/db_dumps/latest.sql.gz
 
 # Cleanup old temporary files if any
 rm -f /tmp/db_dump_*.sql /tmp/db_dump_*.sql.gz
