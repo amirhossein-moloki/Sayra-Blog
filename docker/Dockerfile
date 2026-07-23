@@ -5,6 +5,20 @@ RUN groupadd -g 10001 -r appuser && useradd -u 10001 -r -g appuser -d /app -s /s
 
 WORKDIR /app
 
+# Dedicated development stage extending from base
+FROM base AS development
+
+# Install system dependencies needed for development, prisma, and native modules
+RUN apt-get update && \
+    apt-get install -y \
+        openssl \
+        python3 \
+        make \
+        g++ \
+        libvips-dev \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 # Stage 2: Builder stage for compiling dependencies and building the app
 FROM base AS builder
 

@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-      target: base
+      target: development
     restart: always
     ports:
       - '3000:3000'

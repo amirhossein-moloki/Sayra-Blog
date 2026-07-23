@@ -17,11 +17,10 @@ server {
     add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
 
     # Static Media Files
-    location ${MEDIA_LOCAL_PUBLIC_PATH} {
-        alias /app/storage;
+    location ${MEDIA_LOCAL_PUBLIC_PATH}/ {
+        alias /app/storage/;
         expires 30d;
         add_header Cache-Control "public, no-transform";
-        try_files $uri =404;
     }
 
     # API and Backend
