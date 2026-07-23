@@ -1,5 +1,495 @@
 openapi: 3.0.0
 info:
-  title: Boilerplate API
+  title: Playnest CMS/Blog API
   version: 1.0.0
-paths: {}
+  description: API documentation for Playnest modular Blog/CMS integration (Posts, Taxonomy, Comments, and Reactions).
+  contact:
+    name: Playnest Support
+    email: support@playnest.com
+
+servers:
+  - url: /api/v1
+    description: v1 Base URL
+
+tags:
+  - name: Posts
+    description: Blog posts management and retrieval
+  - name: Taxonomy
+    description: Categories and tags management
+  - name: Comments
+    description: Comment creation, moderation, and tree retrieval
+  - name: Reactions
+    description: User post and comment reactions
+
+paths:
+  /gamingCenters/{gamingCenterId}/posts:
+    get:
+      tags:
+        - Posts
+      summary: Retrieve a list of blog posts
+      description: Get all active blog posts filtered by gamingCenterId, category, author, status, or search terms.
+      operationId: getPosts
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, REVIEW, SCHEDULED, PUBLISHED, ARCHIVED]
+      responses:
+        '200':
+          description: A paginated list of posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags:
+        - Posts
+      summary: Create a new blog post
+      description: Allows administrators and managers to publish or schedule new blog posts.
+      operationId: createPost
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostInput'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /gamingCenters/{gamingCenterId}/posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Get a blog post by ID
+      description: Retrieve detail of a single post by its ID and gamingCenterId.
+      operationId: getPostById
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+
+    patch:
+      tags:
+        - Posts
+      summary: Update an existing blog post
+      description: Allows author/managers to update titles, contents, categories, or status of a post.
+      operationId: updatePost
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostInput'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+    delete:
+      tags:
+        - Posts
+      summary: Delete a blog post
+      description: Soft deletes a blog post by ID.
+      operationId: deletePost
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Post deleted successfully
+
+  /gamingCenters/{gamingCenterId}/taxonomy/categories:
+    get:
+      tags:
+        - Taxonomy
+      summary: Get all categories
+      description: Retrieve a paginated list of taxonomical categories scoped to a gamingCenter.
+      operationId: getCategories
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of categories
+
+    post:
+      tags:
+        - Taxonomy
+      summary: Create a category
+      description: Allows administrators and managers to create nested categories.
+      operationId: createCategory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Category created successfully
+
+  /gamingCenters/{gamingCenterId}/taxonomy/tags:
+    get:
+      tags:
+        - Taxonomy
+      summary: Get all tags
+      description: Retrieve all active tags for blog posts under a specific gamingCenterId.
+      operationId: getTags
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of tags
+
+    post:
+      tags:
+        - Taxonomy
+      summary: Create a tag
+      description: Create a new tag for post identification.
+      operationId: createTag
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Tag created successfully
+
+  /gamingCenters/{gamingCenterId}/comments:
+    post:
+      tags:
+        - Comments
+      summary: Create a comment
+      description: Post a new comment or nested reply onto a blog post.
+      operationId: createComment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - postId
+                - content
+              properties:
+                postId:
+                  type: string
+                parentId:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Comment created successfully
+
+  /gamingCenters/{gamingCenterId}/comments/tree:
+    get:
+      tags:
+        - Comments
+      summary: Get threaded comments tree for a post
+      description: Fetch comment thread structure with full reply nested objects.
+      operationId: getCommentTree
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Threaded comments tree list
+
+  /gamingCenters/{gamingCenterId}/reactions/toggle:
+    post:
+      tags:
+        - Reactions
+      summary: Toggle reaction (like/love/etc.) on an object
+      description: Allows users to express feelings/reactions towards comments or posts.
+      operationId: toggleReaction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: gamingCenterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentType
+                - objectId
+                - type
+              properties:
+                contentType:
+                  type: string
+                  enum: [post, comment]
+                objectId:
+                  type: string
+                type:
+                  type: string
+                  enum: [LIKE, LOVE, LAUGH, WOW, SAD, ANGRY]
+      responses:
+        '200':
+          description: Reaction toggled successfully
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        gamingCenterId:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreatePostInput:
+      type: object
+      required:
+        - title
+        - slug
+        - content
+        - excerpt
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, REVIEW, SCHEDULED, PUBLISHED, ARCHIVED]
+        scheduledAt:
+          type: string
+          format: date-time
+        categoryId:
+          type: string
+        seriesId:
+          type: string
+        tagIds:
+          type: array
+          items:
+            type: string
+
+    UpdatePostInput:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, REVIEW, SCHEDULED, PUBLISHED, ARCHIVED]
+        scheduledAt:
+          type: string
+          format: date-time
+        categoryId:
+          type: string
+        seriesId:
+          type: string
+        tagIds:
+          type: array
+          items:
+            type: string
+        changeNote:
+          type: string
