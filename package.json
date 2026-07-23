@@ -6,6 +6,7 @@
     "dev": "tsx src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc --ignoreDeprecations 5.0",
+    "postbuild": "node -e \"const fs = require('fs'); fs.mkdirSync('dist/docs', { recursive: true }); fs.copyFileSync('src/docs/openapi.yaml', 'dist/docs/openapi.yaml');\"",
     "lint": "eslint . --ext .ts",
     "api:validate": "npx @stoplight/spectral-cli lint src/docs/openapi.yaml",
     "test": "jest",
