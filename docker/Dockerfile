@@ -1,7 +1,7 @@
 # Stage 1: Base image with non-root appuser
 FROM node:22-slim AS base
 
-RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
+RUN groupadd -g 10001 -r appuser && useradd -u 10001 -r -g appuser -d /app -s /sbin/nologin appuser
 
 WORKDIR /app
 
