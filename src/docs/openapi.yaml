@@ -1,5 +1,1374 @@
 openapi: 3.0.0
 info:
-  title: Boilerplate API
+  title: PlayNest API Documentation
   version: 1.0.0
-paths: {}
+  description: Complete and professional OpenAPI specification for the PlayNest Gaming Center platform.
+  contact:
+    name: PlayNest Support Team
+    email: support@playnest.com
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+tags:
+  - name: Health
+    description: System status and health check endpoints
+  - name: Auth
+    description: Authentication flows for staff and customers
+  - name: GamingCenters
+    description: Gaming Center configuration and management
+  - name: GameStations
+    description: Game Station setups, consoles, and public visibility
+  - name: Reservations
+    description: Booking workflows, status confirmations, and online reservations
+  - name: Customers
+    description: Customer panel endpoints and reservation history
+  - name: Staff
+    description: Staff roster management and shift scheduling
+  - name: Analytics
+    description: Performance monitoring, metrics, and usage statistics
+  - name: Media
+    description: Asset storage and file upload utilities
+  - name: CMS
+    description: Content Management System pages and site customization
+  - name: Finance
+    description: Payments processing and transaction logging
+  - name: Audit
+    description: Security auditing and admin log review
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealthStatus
+      summary: Health check endpoint
+      description: Returns the status of the server and database connection.
+      responses:
+        '200':
+          description: Server is healthy and running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /auth/user/otp/request:
+    post:
+      tags:
+        - Auth
+      operationId: requestUserOtp
+      summary: Request OTP for Staff
+      description: Sends an OTP (SMS or WhatsApp) to the staff member's registered phone number for authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+                purpose:
+                  type: string
+                  enum: [LOGIN, SIGNUP]
+                  example: LOGIN
+      responses:
+        '200':
+          description: OTP successfully sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP sent successfully
+
+  /auth/user/otp/verify:
+    post:
+      tags:
+        - Auth
+      operationId: verifyUserOtp
+      summary: Verify Staff OTP
+      description: Verifies the staff member's code and returns authorization tokens for staff login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - code
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: OTP verified and token returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /auth/user/login/otp:
+    post:
+      tags:
+        - Auth
+      operationId: loginUserWithOtp
+      summary: Direct Staff Login with OTP code
+      description: Directly logs in a staff user using their phone number and verified OTP code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - code
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Logged in successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /auth/customer/otp/request:
+    post:
+      tags:
+        - Auth
+      operationId: requestCustomerOtp
+      summary: Request OTP for Customers
+      description: Sends an OTP code to the customer's phone number for dynamic login or verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+      responses:
+        '200':
+          description: OTP successfully sent to customer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP sent successfully
+
+  /auth/customer/otp/verify:
+    post:
+      tags:
+        - Auth
+      operationId: verifyCustomerOtp
+      summary: Verify Customer OTP
+      description: Verifies the customer code and returns access tokens for customer panel access.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - code
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Customer verification successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      operationId: loginUser
+      summary: Classic Password Login
+      description: Logs in a user (usually system administrators or managers) using their mobile number and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - password
+              properties:
+                phone:
+                  type: string
+                  example: "09123456789"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Authorized successfully with password.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      operationId: refreshTokens
+      summary: Refresh Access Token
+      description: Renews an expired access token using a valid, non-expired refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Token successfully refreshed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      operationId: logoutUser
+      summary: Logout User
+      description: Invalidates the current session and logs out the actor securely.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully.
+
+  /auth/me:
+    get:
+      tags:
+        - Auth
+      operationId: getAuthMe
+      summary: Get Current Profile
+      description: Returns detailed profile information about the currently authenticated user or customer.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile data returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  phone:
+                    type: string
+                  fullName:
+                    type: string
+                  role:
+                    type: string
+
+  /gamingCenters:
+    get:
+      tags:
+        - GamingCenters
+      operationId: listGamingCenters
+      summary: List Gaming Centers
+      description: Retrieves a list of all active gaming centers registered in the platform.
+      responses:
+        '200':
+          description: List of centers returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GamingCenter'
+    post:
+      tags:
+        - GamingCenters
+      operationId: createGamingCenter
+      summary: Create Gaming Center
+      description: Creates a new gaming center. Restricted to System Administrators.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GamingCenterInput'
+      responses:
+        '201':
+          description: Gaming center created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamingCenter'
+
+  /gamingCenters/{id}:
+    get:
+      tags:
+        - GamingCenters
+      operationId: getGamingCenterDetails
+      summary: Get Gaming Center Details
+      description: Retrieves details of a specific gaming center by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gaming center details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamingCenter'
+    patch:
+      tags:
+        - GamingCenters
+      operationId: updateGamingCenter
+      summary: Update Gaming Center
+      description: Partially updates detailed configuration or info of a specific gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GamingCenterInput'
+      responses:
+        '200':
+          description: Gaming center updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamingCenter'
+    delete:
+      tags:
+        - GamingCenters
+      operationId: deleteGamingCenter
+      summary: Delete Gaming Center
+      description: Fully deletes a specific gaming center by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Gaming center deleted successfully.
+
+  /gamingCenters/{id}/stations:
+    get:
+      tags:
+        - GameStations
+      operationId: listStations
+      summary: List Stations for a Gaming Center
+      description: Retrieves a list of all game stations (consoles/PCs) in a specific gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of stations returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameStation'
+    post:
+      tags:
+        - GameStations
+      operationId: createStation
+      summary: Define a New Game Station
+      description: Defines and adds a new game station configuration within a specific gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameStationInput'
+      responses:
+        '201':
+          description: Station created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStation'
+
+  /gamingCenters/{id}/stations/{sid}:
+    get:
+      tags:
+        - GameStations
+      operationId: getStationDetails
+      summary: Get Station Details
+      description: Retrieves detailed attributes of a specific game station within a center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game station details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStation'
+    patch:
+      tags:
+        - GameStations
+      operationId: editStationDetails
+      summary: Edit Station Details
+      description: Partially updates detailed configuration elements of a specific station.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameStationInput'
+      responses:
+        '200':
+          description: Game station updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStation'
+    delete:
+      tags:
+        - GameStations
+      operationId: deleteStation
+      summary: Delete Station
+      description: Deletes a specific game station from the system.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Station deleted successfully.
+
+  /public/gamingCenters/{slug}/stations:
+    get:
+      tags:
+        - GameStations
+      operationId: listPublicStations
+      summary: List Public Stations for Reservation
+      description: Lists active game stations to public users searching by gaming center slug.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of public stations returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameStation'
+
+  /gamingCenters/{id}/reservations:
+    get:
+      tags:
+        - Reservations
+      operationId: listReservations
+      summary: List All Reservations
+      description: Retrieves a list of all reservations made within a specific gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of reservations returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+    post:
+      tags:
+        - Reservations
+      operationId: createReservationAsStaff
+      summary: Create Reservation (Operator/Staff)
+      description: Creates a new station reservation directly via operator/staff panel.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationInput'
+      responses:
+        '201':
+          description: Reservation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+
+  /gamingCenters/{id}/reservations/{rid}:
+    get:
+      tags:
+        - Reservations
+      operationId: getReservationDetails
+      summary: Get Reservation Details
+      description: Retrieves full parameters of a specific reservation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reservation details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+    patch:
+      tags:
+        - Reservations
+      operationId: modifyReservationDetails
+      summary: Modify Reservation Details
+      description: Updates the schedule, station, or note metadata for a reservation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationInput'
+      responses:
+        '200':
+          description: Reservation updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+
+  /gamingCenters/{id}/reservations/{rid}/confirm:
+    post:
+      tags:
+        - Reservations
+      operationId: confirmReservation
+      summary: Confirm a Reservation
+      description: Confirms a pending booking reservation, securing the slot for the customer.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reservation confirmed successfully.
+
+  /gamingCenters/{id}/reservations/{rid}/cancel:
+    post:
+      tags:
+        - Reservations
+      operationId: cancelReservation
+      summary: Cancel a Reservation
+      description: Cancels an active or pending reservation, offering optional cancellation reason tracking.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: "Customer request"
+      responses:
+        '200':
+          description: Reservation canceled successfully.
+
+  /gamingCenters/{id}/reservations/{rid}/complete:
+    post:
+      tags:
+        - Reservations
+      operationId: completeReservation
+      summary: Complete Reservation and Check-out
+      description: Finalizes and checks out the session for a reservation, registering final status and billing data.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reservation completed and invoice finalized successfully.
+
+  /gamingCenters/{id}/reservations/{rid}/no-show:
+    post:
+      tags:
+        - Reservations
+      operationId: markReservationNoShow
+      summary: Mark Reservation as No-Show
+      description: Marks the booking as missed due to customer absence.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reservation marked as no-show successfully.
+
+  /public/gamingCenters/{slug}/reservations:
+    post:
+      tags:
+        - Reservations
+      operationId: publicOnlineReservation
+      summary: Public Online Reservation
+      description: Allows public users or visitors to reserve a slot online using a gaming center's unique slug.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationInput'
+      responses:
+        '201':
+          description: Online booking requested successfully.
+
+  /customer/me:
+    get:
+      tags:
+        - Customers
+      operationId: getCustomerProfile
+      summary: Get Customer Profile (Customer Panel)
+      description: Retrieves the currently logged-in customer's profile, including active wallet balance and personal notes.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Customer profile details returned successfully.
+
+  /customer/reservations:
+    get:
+      tags:
+        - Customers
+      operationId: getCustomerReservations
+      summary: Get Customer Booking History
+      description: Retrieves historical and upcoming bookings associated with the current customer account.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: History of customer reservations returned successfully.
+
+  /customer/reservations/{id}/cancel:
+    post:
+      tags:
+        - Customers
+      operationId: cancelReservationByCustomer
+      summary: Cancel Reservation by Customer
+      description: Allows a customer to cancel their own reservation if it conforms to dynamic cancellation window rules.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Reservation canceled by customer successfully.
+
+  /customer/reservations/{id}/ratings:
+    post:
+      tags:
+        - Customers
+      operationId: submitRating
+      summary: Submit Rating and Comment for Reservation
+      description: Submits a multi-factor user review and overall score rating for a previous completed session.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+                comment:
+                  type: string
+                  example: "Great console, very clean setup!"
+      responses:
+        '200':
+          description: Rating submitted successfully.
+
+  /gamingCenters/{id}/staff:
+    get:
+      tags:
+        - Staff
+      operationId: listStaff
+      summary: List Staff Members
+      description: Retrieves a list of all staff members and operational users attached to a specific center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of staff returned successfully.
+    post:
+      tags:
+        - Staff
+      operationId: addStaff
+      summary: Add Staff Member
+      description: Adds a new worker profile or staff role within a specific gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullName
+                - phone
+                - role
+              properties:
+                fullName:
+                  type: string
+                  example: "John Doe"
+                phone:
+                  type: string
+                  example: "09121111111"
+                role:
+                  type: string
+                  enum: [MANAGER, SUPERVISOR, STAFF, TRAINEE, SUPPORT, ADMIN]
+                  example: STAFF
+      responses:
+        '201':
+          description: Staff added successfully.
+
+  /gamingCenters/{id}/staff/{uid}/staffShifts:
+    put:
+      tags:
+        - Staff
+      operationId: configureStaffShifts
+      summary: Configure Working Shifts for Staff
+      description: Updates or sets weekly shift schedules and active roles for a particular staff user.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  dayOfWeek:
+                    type: integer
+                    example: 1
+                  startTime:
+                    type: string
+                    example: "09:00"
+                  endTime:
+                    type: string
+                    example: "17:00"
+                  shiftRole:
+                    type: string
+                    example: HOST
+      responses:
+        '200':
+          description: Shift schedule updated successfully.
+
+  /gamingCenters/{id}/analytics/summary:
+    get:
+      tags:
+        - Analytics
+      operationId: getAnalyticsSummary
+      summary: Get Gaming Center Performance Summary
+      description: Fetches a summarized, high-level operational statistics dashboard of a gaming center.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Analytics summary payload returned successfully.
+
+  /gamingCenters/{id}/analytics/staff:
+    get:
+      tags:
+        - Analytics
+      operationId: getStaffAnalytics
+      summary: Get Staff Performance Analytics
+      description: Generates analytics and tracking statistics measuring staff efficiency and task processing.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Staff performance metrics returned.
+
+  /gamingCenters/{id}/analytics/stations:
+    get:
+      tags:
+        - Analytics
+      operationId: getStationAnalytics
+      summary: Get Station Occupancy and Utilization Analytics
+      description: Fetches usage, hourly bookings, and utility rates across all game stations.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Station analytics list returned successfully.
+
+  /gamingCenters/{id}/analytics/revenue-chart:
+    get:
+      tags:
+        - Analytics
+      operationId: getRevenueChart
+      summary: Get Revenue Chart Data
+      description: Returns analytical timeline values for revenue mapping and charting purposes.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Revenue chart points returned.
+
+  /gamingCenters/{id}/media/upload:
+    post:
+      tags:
+        - Media
+      operationId: uploadMedia
+      summary: Upload Media File
+      description: Uploads brand assets, station photos, or post attachments using multi-part form-data.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File uploaded successfully.
+
+  /gamingCenters/{id}/pages:
+    get:
+      tags:
+        - CMS
+      operationId: listCmsPages
+      summary: List and Manage Pages (CMS)
+      description: Fetches a listing of structured hierarchical sub-pages defined for the brand's public portal.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Static/dynamic CMS pages list returned.
+
+  /gamingCenters/{id}/site-settings:
+    put:
+      tags:
+        - CMS
+      operationId: updateSiteSettings
+      summary: Configure Public Site Settings
+      description: Overwrites default branding, design values, SEO meta keywords, or tags for the gaming center's micro-website.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoUrl:
+                  type: string
+                  example: "https://example.com/logo.png"
+                faviconUrl:
+                  type: string
+                  example: "https://example.com/favicon.ico"
+                defaultSeoTitle:
+                  type: string
+                  example: "PlayNest - Ultimate Gaming Arena"
+      responses:
+        '200':
+          description: Site settings saved successfully.
+
+  /gamingCenters/{id}/reservations/{rid}/payments/init:
+    post:
+      tags:
+        - Finance
+      operationId: initiatePayment
+      summary: Initiate Banking/Online Transaction
+      description: Generates a transaction callback reference and initiates online banking payment.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rid
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - provider
+              properties:
+                amount:
+                  type: integer
+                  example: 50000
+                provider:
+                  type: string
+                  enum: [MANUAL, STRIPE, ZARINPAL]
+                  example: ZARINPAL
+      responses:
+        '200':
+          description: Payment initiated successfully.
+
+  /webhooks/payments/{provider}:
+    post:
+      tags:
+        - Finance
+      operationId: handlePaymentWebhook
+      summary: Process Payment Gateway Webhook
+      description: Handles payment callback pings and gateway webhooks, processing successful or failed transaction events.
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            example: stripe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully.
+
+  /gamingCenters/{id}/audit-logs:
+    get:
+      tags:
+        - Audit
+      operationId: getAuditLogs
+      summary: Get System Audit Logs
+      description: Obtains history records of administrative/operator modifications for security and debugging tracking.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Array of audit logs.
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+
+    GamingCenter:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        pcCount:
+          type: integer
+        consoleCount:
+          type: integer
+        openingTime:
+          type: string
+        closingTime:
+          type: string
+        hourlyRate:
+          type: number
+
+    GamingCenterInput:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        openingTime:
+          type: string
+        closingTime:
+          type: string
+        hourlyRate:
+          type: number
+
+    GameStation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        stationType:
+          type: string
+          enum: [PC, PLAYSTATION, XBOX, SWITCH, VR]
+        isVip:
+          type: boolean
+        hourlyPrice:
+          type: number
+        isActive:
+          type: boolean
+
+    GameStationInput:
+      type: object
+      required:
+        - name
+        - stationType
+        - hourlyPrice
+      properties:
+        name:
+          type: string
+        stationType:
+          type: string
+          enum: [PC, PLAYSTATION, XBOX, SWITCH, VR]
+        isVip:
+          type: boolean
+        hourlyPrice:
+          type: number
+
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+        gamingCenterId:
+          type: string
+        stationId:
+          type: string
+        customerAccountId:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        totalPrice:
+          type: number
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELED, NO_SHOW]
+
+    ReservationInput:
+      type: object
+      required:
+        - stationId
+        - customerAccountId
+        - startTime
+        - endTime
+      properties:
+        stationId:
+          type: string
+        customerAccountId:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        note:
+          type: string
