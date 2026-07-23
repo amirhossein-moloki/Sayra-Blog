@@ -15,7 +15,27 @@ echo "Backing up PostgreSQL database..."
 
 # 3. Handle Redis (Save RDB to disk before backup)
 echo "Triggering Redis BGSAVE..."
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis BGSAVE || echo "Warning: Redis BGSAVE failed, continuing with existing RDB if present."
+if REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis BGSAVE; then
+    echo "Waiting for Redis BGSAVE to complete..."
+    while true; do
+        BG_STATUS=$(REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis info persistence | grep rdb_bgsave_in_progress | tr -d '\r' | cut -d: -f2)
+        if [ "$BG_STATUS" = "0" ]; then
+            echo "Redis BGSAVE completed successfully."
+            break
+        elif [ "$BG_STATUS" = "1" ]; then
+            echo "BGSAVE is still in progress, waiting..."
+            sleep 1
+        else
+            echo "Warning: Unexpected BGSAVE status '$BG_STATUS'. Proceeding anyway."
+            break
+        fi
+    done
+else
+    echo "Warning: Redis BGSAVE command failed, attempting fallback to SAVE..."
+    if ! REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h redis SAVE; then
+        echo "Warning: Redis SAVE also failed, continuing with existing RDB if present."
+    fi
+fi
 
 # 4. Construct backup paths list dynamically to ensure extreme portability and avoid missing folder failures
 BACKUP_PATHS=()

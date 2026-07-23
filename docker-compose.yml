@@ -88,7 +88,7 @@ services:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:rw,uid=10001,gid=10001,mode=1777
       - /app/logs:rw,uid=10001,gid=10001,mode=0755
     cap_drop:
       - ALL
@@ -119,6 +119,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     env_file:
       - .env
     environment:
@@ -134,7 +140,7 @@ services:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:rw,uid=10001,gid=10001,mode=1777
       - /app/logs:rw,uid=10001,gid=10001,mode=0755
     cap_drop:
       - ALL
@@ -175,9 +181,10 @@ services:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:rw,uid=101,gid=101,mode=1777
       - /var/cache/nginx:uid=101,gid=101,mode=0755
       - /var/log/nginx:uid=101,gid=101,mode=0755
+      - /etc/nginx/conf.d:uid=101,gid=101,mode=0755
     cap_drop:
       - ALL
     cap_add:
@@ -214,6 +221,7 @@ services:
     environment:
       - RESTIC_PASSWORD=${RESTIC_PASSWORD:-change_this_secure_restic_password}
       - RESTIC_REPOSITORY=/backups
+      - RESTIC_CACHE_DIR=/tmp/restic-cache
       - POSTGRES_USER=${POSTGRES_USER:-playnest_admin}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_this_secure_password_in_production}
       - POSTGRES_DB=${POSTGRES_DB:-playnest_prod}
@@ -222,9 +230,9 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-change_this_secure_password_in_production}
       - BACKUP_CRON_INTERVAL=3600
     volumes:
-      - app_storage:/storage:ro
+      - app_storage:/storage
       - postgres_data:/data:ro
-      - redis_data:/redis_data:ro
+      - redis_data:/redis_data
       - ./docker/nginx:/nginx_config:ro
       - .:/project_root:ro
       - backups_data:/backups
@@ -232,7 +240,7 @@ services:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:rw,uid=10002,gid=10002,mode=1777
       - /var/log:rw,uid=10002,gid=10002,mode=0755
     cap_drop:
       - ALL
