@@ -13,15 +13,24 @@ mkdir -p /restore
 restic restore $SNAPSHOT_ID --target /restore
 
 # 2. Restore PostgreSQL Database
-if [ -f "/restore/data/db/latest.sql.gz" ]; then
-    echo "Found PostgreSQL dump. Restoring..."
-    gunzip -c /restore/data/db/latest.sql.gz > /tmp/restore_db.sql
+DUMP_PATH=""
+if [ -f "/restore/tmp/db_dumps/latest.sql.gz" ]; then
+    DUMP_PATH="/restore/tmp/db_dumps/latest.sql.gz"
+elif [ -f "/restore/data/db/latest.sql.gz" ]; then
+    DUMP_PATH="/restore/data/db/latest.sql.gz"
+fi
+
+if [ -n "$DUMP_PATH" ]; then
+    echo "Found PostgreSQL dump at $DUMP_PATH. Restoring..."
+    gunzip -c "$DUMP_PATH" > /tmp/restore_db.sql
     PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$POSTGRES_DB' AND pid <> pg_backend_pid();"
     PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS \"$POSTGRES_DB\";"
     PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d postgres -c "CREATE DATABASE \"$POSTGRES_DB\";"
     PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB < /tmp/restore_db.sql
     rm /tmp/restore_db.sql
     echo "PostgreSQL restoration complete."
+else
+    echo "Warning: No PostgreSQL logical dump found in snapshot."
 fi
 
 # 3. Restore Redis
