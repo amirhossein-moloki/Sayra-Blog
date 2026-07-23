@@ -23,7 +23,7 @@ const logger = pino({
   transport: isProduction
     ? {
       target: 'pino/file',
-      options: { destination: './app.log' },
+      options: { destination: '/app/logs/app.log' },
     }
     : {
       target: 'pino-pretty',
